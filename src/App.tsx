@@ -775,7 +775,7 @@ function CalendarioSection() {
               {t('calendar.badge')} {CURRENT_YEAR}
             </Badge>
             <h2 className="font-f1 text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-4">
-              {t('calendar.title')} <span className="text-[#E10600]">{t('nav.calendar')}</span>
+              {t('calendar.title')} <span className="text-[#E10600]">{t('calendar.keyword')}</span>
             </h2>
             <p className="text-white/50 text-lg max-w-2xl mx-auto">
               {t('calendar.subtitle')} {CURRENT_YEAR}.
@@ -1015,7 +1015,7 @@ function OndeAssistirSection() {
               {t('watch.badge')}
             </Badge>
             <h2 className="font-f1 text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-4">
-              {t('watch.title')} <span className="text-[#E10600]">{t('nav.watch')}</span>
+              {t('watch.title')} <span className="text-[#E10600]">{t('watch.keyword')}</span>
             </h2>
             <p className="text-white/50 text-lg max-w-2xl mx-auto">
               {t('watch.subtitle')}
@@ -1516,7 +1516,7 @@ function ClimaSection() {
               {t('weather.badge')}
             </Badge>
             <h2 className="font-f1 text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-4">
-              {t('weather.title')} <span className="text-[#E10600]">{t('nav.weather')}</span>
+              {t('weather.title')} <span className="text-[#E10600]">{t('weather.keyword')}</span>
             </h2>
             <p className="text-white/50 text-lg max-w-2xl mx-auto">
               {t('weather.subtitle')}

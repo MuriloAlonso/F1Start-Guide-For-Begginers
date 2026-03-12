@@ -112,6 +112,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Calendário
     'calendar.badge': 'Temporada',
     'calendar.title': 'Calendário de',
+    'calendar.keyword': 'Corridas',
     'calendar.subtitle': 'Acompanhe todas as datas e horários das corridas da temporada',
     'calendar.official.title': 'Calendário Oficial F1',
     'calendar.official.desc': 'Acesse o calendário completo com todas as datas, horários e circuitos da temporada diretamente no site oficial da Fórmula 1.',
@@ -147,6 +148,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Onde Assistir
     'watch.badge': 'Transmissão',
     'watch.title': 'Onde',
+    'watch.keyword': 'Assistir',
     'watch.subtitle': 'Descubra onde assistir às corridas de Fórmula 1 ao vivo na TV e streaming.',
     'watch.live': 'Assistir ao vivo',
     'watch.f1tv.title': 'F1 TV Pro - Oficial',
@@ -245,6 +247,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Clima
     'weather.badge': 'Condições',
     'weather.title': 'Clima &',
+    'weather.keyword': 'Estratégia',
     'weather.subtitle': 'O clima é um fator crucial que pode mudar completamente o resultado de uma corrida.',
     'weather.dry.title': 'Pista Seca',
     'weather.dry.desc': 'Condições ideais. Pneus de seco (macio, médio, duro).',
@@ -400,6 +403,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Calendário
     'calendar.badge': 'Season',
     'calendar.title': 'Race',
+    'calendar.keyword': 'Calendar',
     'calendar.subtitle': 'Follow all dates and times for the season races',
     'calendar.official.title': 'Official F1 Calendar',
     'calendar.official.desc': 'Access the complete calendar with all dates, times and circuits for the season directly on the official Formula 1 website.',
@@ -435,6 +439,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Onde Assistir
     'watch.badge': 'Broadcast',
     'watch.title': 'Where to',
+    'watch.keyword': 'Watch',
     'watch.subtitle': 'Discover where to watch Formula 1 races live on TV and streaming.',
     'watch.live': 'Watch live',
     'watch.f1tv.title': 'F1 TV Pro - Official',
@@ -533,6 +538,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Clima
     'weather.badge': 'Conditions',
     'weather.title': 'Weather &',
+    'weather.keyword': 'Strategy',
     'weather.subtitle': 'Weather is a crucial factor that can completely change the outcome of a race.',
     'weather.dry.title': 'Dry Track',
     'weather.dry.desc': 'Ideal conditions. Dry tires (soft, medium, hard).',
