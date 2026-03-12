@@ -613,7 +613,7 @@ function RegrasSection() {
 function EquipesSection() {
   const { ref, isVisible } = useScrollAnimation()
   const { data } = useF1Data()
-  const { t } = useApp()
+  const { t, language } = useApp()
   const teams = useMemo(() => data?.teams || defaultTeams, [data])
   const { getTeamData, loading: standingsLoading } = useConstructorStandings()
 
@@ -690,23 +690,21 @@ function EquipesSection() {
                           const live = getTeamData(team.name)
                           return live !== null ? (
                             <span className="text-[#E10600] font-bold">{live.points} pts</span>
-                          ) : (
-                            <span className="text-white/40 font-bold text-sm">—</span>
-                          )
+                          ) : null
                         })()}
                       </div>
                     </div>
                     {(() => {
                       const live = getTeamData(team.name)
-                      if (!standingsLoading && live !== null && (live.wins > 0 || live.position > 0)) {
+                      if (!standingsLoading && live !== null) {
                         return (
                           <div className="grid grid-cols-2 gap-4">
                             <div className="bg-white/5 p-3 rounded-lg">
-                              <span className="text-white/50 text-sm block">{t('points.title') || 'Posição'}</span>
+                              <span className="text-white/50 text-sm block">{language === 'pt' ? 'Posição' : 'Position'}</span>
                               <span className="text-white font-bold">#{live.position}</span>
                             </div>
                             <div className="bg-white/5 p-3 rounded-lg">
-                              <span className="text-white/50 text-sm block">{t('teams.wins') || 'Vitórias'}</span>
+                              <span className="text-white/50 text-sm block">{language === 'pt' ? 'Vitórias' : 'Wins'}</span>
                               <span className="text-white font-bold">{live.wins}</span>
                             </div>
                           </div>

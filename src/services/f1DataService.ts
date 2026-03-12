@@ -397,11 +397,23 @@ export function useConstructorStandings() {
 
   const getTeamData = (teamName: string): { points: number; wins: number; position: number } | null => {
     if (standings.length === 0) return null;
-    const normalized = teamName.toLowerCase().replace(/[\s\-_]/g, '');
-    const match = standings.find(s => {
-      const sn = s.name.toLowerCase().replace(/[\s\-_]/g, '');
-      return sn.includes(normalized) || normalized.includes(sn) || normalized.startsWith(sn.slice(0, 5));
-    });
+    const CONSTRUCTOR_ID_MAP: Record<string, string> = {
+      'mclaren':       'mclaren',
+      'ferrari':       'ferrari',
+      'red bull racing': 'red_bull',
+      'mercedes':      'mercedes',
+      'aston martin':  'aston_martin',
+      'alpine':        'alpine',
+      'williams':      'williams',
+      'racing bulls':  'rb',
+      'haas':          'haas',
+      'audi':          'audi',
+      'cadillac':      'cadillac',
+    };
+    const key = teamName.toLowerCase();
+    const constructorId = CONSTRUCTOR_ID_MAP[key];
+    if (!constructorId) return null;
+    const match = standings.find(s => s.constructorId === constructorId);
     return match ? { points: match.points, wins: match.wins, position: match.position } : null;
   };
 
