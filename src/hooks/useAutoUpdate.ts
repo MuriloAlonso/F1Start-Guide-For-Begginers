@@ -19,7 +19,7 @@ interface UseAutoUpdateReturn {
 }
 
 export const useAutoUpdate = (options: UseAutoUpdateOptions = {}): UseAutoUpdateReturn => {
-  const { interval = 5 * 60 * 1000, immediate = true, language = 'pt' } = options; // 5 minutos padrão
+  const { interval = 15 * 60 * 1000, immediate = true, language = 'pt' } = options; // 15 minutos (era 5)
   
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +29,8 @@ export const useAutoUpdate = (options: UseAutoUpdateOptions = {}): UseAutoUpdate
   const [hasUpdate, setHasUpdate] = useState(false);
   
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isCheckingRef = useRef(false); // Guard para evitar checkUpdates concorrentes
+  const visibilityDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Debounce para visibilidade
 
   // Função para buscar notícias
   const fetchNews = useCallback(async (showLoading = false) => {
@@ -53,13 +55,18 @@ export const useAutoUpdate = (options: UseAutoUpdateOptions = {}): UseAutoUpdate
     }
   }, [language]);
 
-  // Função para verificar atualizações
+  // Função para verificar atualizações — com guard contra chamadas concorrentes
   const checkUpdates = useCallback(async () => {
-    const shouldUpdate = await checkForUpdates(language);
-    if (shouldUpdate) {
-      setHasUpdate(true);
-      // Auto-atualiza se passou tempo suficiente
-      await fetchNews(true);
+    if (isCheckingRef.current) return;
+    isCheckingRef.current = true;
+    try {
+      const shouldUpdate = await checkForUpdates(language);
+      if (shouldUpdate) {
+        setHasUpdate(true);
+        await fetchNews(true);
+      }
+    } finally {
+      isCheckingRef.current = false;
     }
   }, [fetchNews, language]);
 
@@ -104,17 +111,25 @@ export const useAutoUpdate = (options: UseAutoUpdateOptions = {}): UseAutoUpdate
     };
   }, [interval, checkUpdates]);
 
-  // Efeito para visibilidade da página (atualiza quando usuário volta)
+  // Efeito para visibilidade da página — com debounce de 2s para evitar disparos em rafágas
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        checkUpdates();
+        if (visibilityDebounceRef.current) {
+          clearTimeout(visibilityDebounceRef.current);
+        }
+        visibilityDebounceRef.current = setTimeout(() => {
+          checkUpdates();
+        }, 2000);
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (visibilityDebounceRef.current) {
+        clearTimeout(visibilityDebounceRef.current);
+      }
     };
   }, [checkUpdates]);
 

@@ -14,7 +14,7 @@ export interface NewsItem {
 
 // Cache configuration
 const CACHE_KEY = 'f1_news_cache_v4';
-const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutos (era 15)
 
 // Chave de cache separada por idioma
 const getCacheKey = (language: 'pt' | 'en') => `${CACHE_KEY}_${language}`;
@@ -23,6 +23,9 @@ interface CacheData {
   news: NewsItem[];
   timestamp: number;
 }
+
+// Guard para evitar fetches concorrentes
+let isFetching = false;
 
 // Notícias fallback em caso de falha nas APIs
 const FALLBACK_NEWS_PT: NewsItem[] = [
@@ -359,27 +362,22 @@ const translateText = async (text: string): Promise<string> => {
   return data.responseData?.translatedText || text;
 };
 
+// Tradução sequencial: 1 artigo por vez, título + resumo em paralelo (máx 2 req simultâneas)
+// Era: 4 artigos × 2 campos = 8 req simultâneas por lote — agora: 2 req simultâneas no total
 const translateNewsItems = async (items: NewsItem[]): Promise<NewsItem[]> => {
-  const BATCH_SIZE = 4; // Processa 4 artigos por vez para não sobrecarregar a API
   const result: NewsItem[] = [];
 
-  for (let i = 0; i < items.length; i += BATCH_SIZE) {
-    const batch = items.slice(i, i + BATCH_SIZE);
-    const batchResults = await Promise.allSettled(
-      batch.map(async (item) => {
-        try {
-          const [title, summary] = await Promise.all([
-            translateText(item.title),
-            translateText(item.summary),
-          ]);
-          return { ...item, title: title || item.title, summary: summary || item.summary };
-        } catch (err) {
-          console.warn('Falha ao traduzir artigo:', item.title.slice(0, 40), err instanceof Error ? err.message : err);
-          return item;
-        }
-      })
-    );
-    result.push(...batchResults.map((r, idx) => r.status === 'fulfilled' ? r.value : batch[idx]));
+  for (const item of items) {
+    try {
+      const [title, summary] = await Promise.all([
+        translateText(item.title),
+        translateText(item.summary),
+      ]);
+      result.push({ ...item, title: title || item.title, summary: summary || item.summary });
+    } catch (err) {
+      console.warn('Falha ao traduzir artigo:', item.title.slice(0, 40), err instanceof Error ? err.message : err);
+      result.push(item);
+    }
   }
 
   return result;
@@ -398,7 +396,8 @@ const fetchFeedItems = async (feedUrl: string, source: string): Promise<NewsItem
   const items = Array.from(doc.querySelectorAll('item'));
   if (items.length === 0) throw new Error('No items in feed');
 
-  return items.slice(0, 8).map((item, index) => {
+  // Reduzido de 8 para 5 artigos por feed (menos memória e menos traduções)
+  return items.slice(0, 5).map((item, index) => {
     const title = getText(item, 'title');
     const description = getText(item, 'description').slice(0, 300);
     const pubDate = getText(item, 'pubDate');
@@ -422,6 +421,16 @@ const fetchFeedItems = async (feedUrl: string, source: string): Promise<NewsItem
 export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsItem[]> => {
   const cacheKey = getCacheKey(language);
 
+  // Guard: evita múltiplas chamadas simultâneas
+  if (isFetching) {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const cacheData: CacheData = JSON.parse(cached);
+      return cacheData.news;
+    }
+    return language === 'en' ? FALLBACK_NEWS_EN : FALLBACK_NEWS_PT;
+  }
+
   try {
     // Verifica cache do idioma atual primeiro
     const cached = localStorage.getItem(cacheKey);
@@ -434,6 +443,8 @@ export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsIte
         return cacheData.news;
       }
     }
+
+    isFetching = true;
 
     // Tenta buscar de RSS feeds reais (sempre em inglês)
     const results = await Promise.allSettled(
@@ -487,12 +498,15 @@ export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsIte
 
     // Último recurso: notícias estáticas de fallback
     return language === 'en' ? FALLBACK_NEWS_EN : FALLBACK_NEWS_PT;
+  } finally {
+    isFetching = false;
   }
 };
 
 // Função para forçar atualização
 export const forceNewsUpdate = async (language: 'pt' | 'en' = 'pt'): Promise<NewsItem[]> => {
   localStorage.removeItem(getCacheKey(language));
+  isFetching = false; // Reseta o guard para permitir fetch forçado
   return fetchF1News(language);
 };
 

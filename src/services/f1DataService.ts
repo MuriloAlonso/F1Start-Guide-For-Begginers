@@ -1,6 +1,8 @@
 // F1 Data Service - Busca dados do site oficial da Formula 1
 // Este serviço faz scraping do formula1.com e mantém os dados atualizados
 
+import { useState, useEffect } from 'react';
+
 const CACHE_KEY = 'f1_data_cache';
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hora
 
@@ -239,43 +241,86 @@ export async function refreshF1Data(): Promise<F1Cache> {
   return fetchF1Data();
 }
 
-// Hook para usar dados da F1 com atualização automática
+// ---- Shared singleton para o hook useF1Data ----
+// Evita 3 setIntervals independentes quando useF1Data() é chamado em 3 componentes
+type Listener = (data: F1Cache) => void;
+
+let sharedData: F1Cache | null = null;
+let sharedLoading = true;
+let sharedError: string | null = null;
+let sharedInterval: ReturnType<typeof setInterval> | null = null;
+const listeners = new Set<Listener>();
+
+function notifyListeners() {
+  if (sharedData) {
+    listeners.forEach(fn => fn(sharedData!));
+  }
+}
+
+async function loadSharedData() {
+  try {
+    sharedLoading = true;
+    sharedData = await fetchF1Data();
+    sharedError = null;
+  } catch {
+    sharedError = 'Erro ao carregar dados da F1';
+  } finally {
+    sharedLoading = false;
+    notifyListeners();
+  }
+}
+
+function ensureSharedInterval() {
+  if (!sharedInterval) {
+    loadSharedData();
+    sharedInterval = setInterval(loadSharedData, CACHE_DURATION);
+  }
+}
+
+function destroySharedIntervalIfEmpty() {
+  if (listeners.size === 0 && sharedInterval) {
+    clearInterval(sharedInterval);
+    sharedInterval = null;
+  }
+}
+
+// Hook para usar dados da F1 — todos os chamadores compartilham um único setInterval
 export function useF1Data() {
-  const [data, setData] = useState<F1Cache | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<F1Cache | null>(sharedData);
+  const [loading, setLoading] = useState(sharedLoading);
+  const [error, setError] = useState<string | null>(sharedError);
 
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const f1Data = await fetchF1Data();
-        setData(f1Data);
-        setError(null);
-      } catch (err) {
-        setError('Erro ao carregar dados da F1');
-      } finally {
-        setLoading(false);
-      }
+    const listener: Listener = (newData) => {
+      setData(newData);
+      setLoading(false);
+      setError(null);
     };
 
-    loadData();
+    listeners.add(listener);
+    ensureSharedInterval();
 
-    // Atualiza a cada hora
-    interval = setInterval(loadData, CACHE_DURATION);
+    // Se os dados já existem, aplica imediatamente
+    if (sharedData) {
+      setData(sharedData);
+      setLoading(false);
+    }
 
-    return () => clearInterval(interval);
+    return () => {
+      listeners.delete(listener);
+      destroySharedIntervalIfEmpty();
+    };
   }, []);
 
   const refresh = async () => {
     setLoading(true);
     try {
-      const f1Data = await refreshF1Data();
-      setData(f1Data);
+      localStorage.removeItem(CACHE_KEY);
+      sharedData = await fetchF1Data();
+      setData(sharedData);
       setError(null);
-    } catch (err) {
+      notifyListeners();
+    } catch {
       setError('Erro ao atualizar dados');
     } finally {
       setLoading(false);
@@ -287,6 +332,3 @@ export function useF1Data() {
 
 // Exporta dados padrão para uso imediato
 export { defaultRaces, defaultTeams, defaultRules };
-
-// Import useState
-import { useState, useEffect } from 'react';
