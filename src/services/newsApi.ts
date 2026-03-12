@@ -13,7 +13,7 @@ export interface NewsItem {
 }
 
 // Cache configuration
-const CACHE_KEY = 'f1_news_cache_v2';
+const CACHE_KEY = 'f1_news_cache_v4';
 const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 
 // Chave de cache separada por idioma
@@ -343,36 +343,46 @@ const fetchWithTimeout = (url: string, ms: number): Promise<Response> => {
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
 };
 
-// Tradução via Google Translate API (gratuito, sem chave)
-const SEP = '|||SEP|||';
-const TRANSLATE_URL = 'https://translate.googleapis.com/translate_a/single';
+// Tradução via MyMemory API — suporta CORS no browser, gratuito, sem chave
+// Docs: https://mymemory.translated.net/doc/spec.php
+const MYMEMORY_URL = 'https://api.mymemory.translated.net/get';
 
-const translateText = async (text: string, targetLang: string): Promise<string> => {
-  const url = `${TRANSLATE_URL}?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+const translateText = async (text: string): Promise<string> => {
+  const truncated = text.slice(0, 480); // MyMemory limita 500 chars por requisição
+  const url = `${MYMEMORY_URL}?q=${encodeURIComponent(truncated)}&langpair=en|pt-BR`;
   const response = await fetchWithTimeout(url, 8000);
-  if (!response.ok) throw new Error(`Translate HTTP ${response.status}`);
+  if (!response.ok) throw new Error(`MyMemory HTTP ${response.status}`);
   const data = await response.json();
-  return (data[0] as string[][]).map(chunk => chunk[0]).join('');
+  if (data.responseStatus !== 200 && data.responseStatus !== '200') {
+    throw new Error(`MyMemory status: ${data.responseStatus}`);
+  }
+  return data.responseData?.translatedText || text;
 };
 
 const translateNewsItems = async (items: NewsItem[]): Promise<NewsItem[]> => {
-  const results = await Promise.allSettled(
-    items.map(async (item) => {
-      try {
-        const combined = `${item.title}${SEP}${item.summary}`;
-        const translated = await translateText(combined, 'pt-BR');
-        const parts = translated.split(SEP);
-        return {
-          ...item,
-          title: parts[0]?.trim() || item.title,
-          summary: parts[1]?.trim() || item.summary,
-        };
-      } catch {
-        return item;
-      }
-    })
-  );
-  return results.map((r, i) => r.status === 'fulfilled' ? r.value : items[i]);
+  const BATCH_SIZE = 4; // Processa 4 artigos por vez para não sobrecarregar a API
+  const result: NewsItem[] = [];
+
+  for (let i = 0; i < items.length; i += BATCH_SIZE) {
+    const batch = items.slice(i, i + BATCH_SIZE);
+    const batchResults = await Promise.allSettled(
+      batch.map(async (item) => {
+        try {
+          const [title, summary] = await Promise.all([
+            translateText(item.title),
+            translateText(item.summary),
+          ]);
+          return { ...item, title: title || item.title, summary: summary || item.summary };
+        } catch (err) {
+          console.warn('Falha ao traduzir artigo:', item.title.slice(0, 40), err instanceof Error ? err.message : err);
+          return item;
+        }
+      })
+    );
+    result.push(...batchResults.map((r, idx) => r.status === 'fulfilled' ? r.value : batch[idx]));
+  }
+
+  return result;
 };
 
 const fetchFeedItems = async (feedUrl: string, source: string): Promise<NewsItem[]> => {
