@@ -200,9 +200,7 @@ function Navigation() {
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-1">
-                <LanguageSelector />
-              </div>
+              <LanguageSelector />
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="xl:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
@@ -219,10 +217,6 @@ function Navigation() {
         <div className="fixed inset-0 bg-black z-[99] xl:hidden pt-20">
           <div className="section-padding h-full overflow-y-auto">
             <div className="flex flex-col gap-2 py-4">
-              {/* Mobile language selector */}
-              <div className="flex items-center gap-2 px-4 py-4 border-b border-white/10 mb-2">
-                <LanguageSelector />
-              </div>
               {navItems.map((item) => (
                 <a
                   key={item.href}
