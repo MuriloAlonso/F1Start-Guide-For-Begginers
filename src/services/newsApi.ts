@@ -63,7 +63,11 @@ const RSS_FEEDS = [
 ];
 
 // Proxy CORS para acessar RSS feeds do browser
-const CORS_PROXY = 'https://api.allorigins.win/get?url=';
+// Em produção (Vercel): usa serverless function própria — sem limites nem dependências externas
+// Em desenvolvimento (Replit): usa allorigins.win como fallback
+const IS_PROD = import.meta.env.PROD;
+const VERCEL_PROXY = '/api/proxy?url=';
+const ALLORIGINS_PROXY = 'https://api.allorigins.win/get?url=';
 
 const stripHtml = (html: string): string =>
   html.replace(/<!\[CDATA\[|\]\]>/g, '')
@@ -173,15 +177,26 @@ const translateNewsItems = async (items: NewsItem[]): Promise<NewsItem[]> => {
 };
 
 const fetchFeedItems = async (feedUrl: string, source: string): Promise<NewsItem[]> => {
-  const proxyUrl = `${CORS_PROXY}${encodeURIComponent(feedUrl)}`;
-  const response = await fetchWithTimeout(proxyUrl, 12000);
-  if (!response.ok) throw new Error(`HTTP ${response.status} para ${source}`);
+  let xmlText: string;
 
-  const json = await response.json();
-  if (!json.contents) throw new Error(`Resposta vazia de ${source}`);
+  if (IS_PROD) {
+    // Produção (Vercel): proxy serverless próprio, retorna XML diretamente
+    const proxyUrl = `${VERCEL_PROXY}${encodeURIComponent(feedUrl)}`;
+    const response = await fetchWithTimeout(proxyUrl, 12000);
+    if (!response.ok) throw new Error(`HTTP ${response.status} para ${source}`);
+    xmlText = await response.text();
+  } else {
+    // Desenvolvimento (Replit): allorigins retorna JSON com campo "contents"
+    const proxyUrl = `${ALLORIGINS_PROXY}${encodeURIComponent(feedUrl)}`;
+    const response = await fetchWithTimeout(proxyUrl, 12000);
+    if (!response.ok) throw new Error(`HTTP ${response.status} para ${source}`);
+    const json = await response.json();
+    if (!json.contents) throw new Error(`Resposta vazia de ${source}`);
+    xmlText = json.contents;
+  }
 
   const parser = new DOMParser();
-  const doc = parser.parseFromString(json.contents, 'text/xml');
+  const doc = parser.parseFromString(xmlText, 'text/xml');
   const items = Array.from(doc.querySelectorAll('item'));
   if (items.length === 0) throw new Error('No items in feed');
 
