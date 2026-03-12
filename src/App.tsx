@@ -36,8 +36,6 @@ import {
   Tv,
   Globe,
   Bell,
-  Sun,
-  Moon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -135,7 +133,7 @@ function useScrollAnimation() {
 function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { t, theme, toggleTheme } = useApp()
+  const { t } = useApp()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -182,7 +180,7 @@ function Navigation() {
             <a href="#hero" className="flex items-center group">
               <div className="h-20 w-20 rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform">
                 <img
-                  src={theme === 'dark' ? '/images/f1start-logo-dark.png' : '/images/f1start-logo-light.png'}
+                  src="/images/f1start-logo-dark.png"
                   alt="F1Start"
                   className="w-full h-full object-cover"
                   style={{ objectPosition: 'center', filter: 'drop-shadow(0 0 8px rgba(225, 6, 0, 0.6))' }}
@@ -203,20 +201,10 @@ function Navigation() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg transition-all theme-toggle-btn"
-                aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
-              >
-                {theme === 'dark'
-                  ? <Sun className="w-5 h-5" />
-                  : <Moon className="w-5 h-5" />
-                }
-              </button>
               <LanguageSelector />
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="xl:hidden p-2 rounded-lg transition-colors theme-menu-btn"
+                className="xl:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -227,7 +215,7 @@ function Navigation() {
 
       {/* Menu Mobile */}
       {isMobileMenuOpen && (
-        <div className={`fixed inset-0 z-[99] xl:hidden pt-20 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+        <div className="fixed inset-0 bg-black z-[99] xl:hidden pt-20">
           <div className="section-padding h-full overflow-y-auto">
             <div className="flex flex-col gap-2 py-4">
               {navItems.map((item) => (
@@ -235,11 +223,7 @@ function Navigation() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-4 rounded-lg transition-all text-lg ${
-                    theme === 'dark'
-                      ? 'text-white/70 hover:text-white hover:bg-white/5'
-                      : 'text-black/70 hover:text-black hover:bg-black/5'
-                  }`}
+                  className="px-4 py-4 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all text-lg"
                 >
                   {item.label}
                 </a>
@@ -1774,7 +1758,7 @@ function NoticiasSection() {
 
 // ==================== FOOTER ====================
 function Footer() {
-  const { t, theme } = useApp()
+  const { t } = useApp()
   
   return (
     <footer className="bg-black">
@@ -1785,7 +1769,7 @@ function Footer() {
             <div className="flex items-center">
               <div className="h-20 w-20 rounded-xl overflow-hidden">
                 <img
-                  src={theme === 'dark' ? '/images/f1start-logo-dark.png' : '/images/f1start-logo-light.png'}
+                  src="/images/f1start-logo-dark.png"
                   alt="F1Start"
                   className="w-full h-full object-cover"
                   style={{ objectPosition: 'center', filter: 'drop-shadow(0 0 8px rgba(225, 6, 0, 0.5))' }}
