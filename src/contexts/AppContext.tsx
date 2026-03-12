@@ -271,7 +271,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Notícias
     'news.badge': 'Atualizações',
-    'news.title': 'Notícias',
+    'news.title': 'Últimas',
     'news.subtitle': 'Fique por dentro das últimas notícias, resultados e atualizações do mundo da Fórmula 1.',
     'news.live': 'AO VIVO',
     'news.minutes': 'minutos atrás',
@@ -559,7 +559,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Notícias
     'news.badge': 'Updates',
-    'news.title': 'News',
+    'news.title': 'Latest',
     'news.subtitle': 'Stay up to date with the latest news, results and updates from the world of Formula 1.',
     'news.live': 'LIVE',
     'news.minutes': 'minutes ago',
