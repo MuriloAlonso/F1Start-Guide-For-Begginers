@@ -22,6 +22,13 @@ src/
   services/        - API/data services
 ```
 
+## News System
+- Real RSS feeds fetched via `api.allorigins.win` CORS proxy
+- Sources: BBC Sport F1, Motorsport.com, RaceFans
+- Cache duration: 15 minutes (localStorage key: `f1_news_cache_v2`)
+- Fallback: static hardcoded news if all feeds fail
+- Only `src/services/newsApi.ts` was modified — all exports, interfaces, and hook signatures remain unchanged
+
 ## Development
 - Run: `npm run dev` (starts on port 5000)
 - Build: `npm run build`

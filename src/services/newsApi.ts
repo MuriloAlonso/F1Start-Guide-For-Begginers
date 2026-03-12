@@ -13,7 +13,7 @@ export interface NewsItem {
 }
 
 // Cache configuration
-const CACHE_KEY = 'f1_news_cache';
+const CACHE_KEY = 'f1_news_cache_v2';
 const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 
 interface CacheData {
@@ -293,6 +293,86 @@ const generateUpdatedNews = (language: 'pt' | 'en' = 'pt'): NewsItem[] => {
   return baseNews;
 };
 
+// RSS feeds públicos de F1
+const RSS_FEEDS = [
+  { url: 'https://feeds.bbci.co.uk/sport/formula1/rss.xml', source: 'BBC Sport F1' },
+  { url: 'https://www.motorsport.com/rss/f1/news/', source: 'Motorsport.com' },
+  { url: 'https://www.racefans.net/feed/', source: 'RaceFans' },
+];
+
+// Proxy CORS para acessar RSS feeds do browser
+const CORS_PROXY = 'https://api.allorigins.win/get?url=';
+
+const stripHtml = (html: string): string =>
+  html.replace(/<!\[CDATA\[|\]\]>/g, '')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&nbsp;/g, ' ')
+      .trim();
+
+const getText = (element: Element, tag: string): string => {
+  const el = element.querySelector(tag);
+  return el ? stripHtml(el.textContent || '') : '';
+};
+
+const detectTag = (title: string, categories: string): string => {
+  const text = (title + ' ' + categories).toLowerCase();
+  if (text.includes('ferrari')) return 'Ferrari';
+  if (text.includes('red bull')) return 'Red Bull';
+  if (text.includes('mercedes')) return 'Mercedes';
+  if (text.includes('mclaren')) return 'McLaren';
+  if (text.includes('qualifying') || text.includes('quali')) return 'Qualifying';
+  if (text.includes('testing') || text.includes('test')) return 'Testes';
+  if (text.includes('transfer') || text.includes('signing') || text.includes('contract')) return 'Mercado';
+  if (text.includes('technical') || text.includes('regulation')) return 'Técnico';
+  if (text.includes('champion')) return 'Campeão';
+  if (text.includes('race') || text.includes('grand prix')) return 'Corrida';
+  return 'F1';
+};
+
+const fetchWithTimeout = (url: string, ms: number): Promise<Response> => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
+};
+
+const fetchFeedItems = async (feedUrl: string, source: string): Promise<NewsItem[]> => {
+  const proxyUrl = `${CORS_PROXY}${encodeURIComponent(feedUrl)}`;
+  const response = await fetchWithTimeout(proxyUrl, 12000);
+  if (!response.ok) throw new Error(`HTTP ${response.status} para ${source}`);
+
+  const json = await response.json();
+  if (!json.contents) throw new Error(`Resposta vazia de ${source}`);
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(json.contents, 'text/xml');
+  const items = Array.from(doc.querySelectorAll('item'));
+  if (items.length === 0) throw new Error('No items in feed');
+
+  return items.slice(0, 8).map((item, index) => {
+    const title = getText(item, 'title');
+    const description = getText(item, 'description').slice(0, 300);
+    const pubDate = getText(item, 'pubDate');
+    const link = getText(item, 'link') || item.querySelector('link')?.getAttribute('href') || '';
+    const categories = Array.from(item.querySelectorAll('category')).map(c => stripHtml(c.textContent || '')).join(' ');
+
+    return {
+      id: generateId(),
+      title,
+      summary: description || title,
+      date: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
+      tag: detectTag(title, categories),
+      important: index < 2,
+      source,
+      url: link || undefined,
+    };
+  }).filter(item => item.title.length > 3);
+};
+
 // Função principal para buscar notícias
 export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsItem[]> => {
   try {
@@ -301,39 +381,61 @@ export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsIte
     if (cached) {
       const cacheData: CacheData = JSON.parse(cached);
       const age = Date.now() - cacheData.timestamp;
-      
-      // Se cache é recente (menos de 15 min), usa ele
+
       if (age < CACHE_DURATION) {
         console.log('Usando cache de notícias');
         return cacheData.news;
       }
     }
 
-    // Tenta buscar de APIs externas
-    // Nota: Em produção, você precisaria de uma API key para NewsAPI
-    // Aqui usamos um fallback inteligente que simula atualizações
-    
-    const news = generateUpdatedNews(language);
-    
-    // Salva no cache
+    // Tenta buscar de RSS feeds reais
+    const results = await Promise.allSettled(
+      RSS_FEEDS.map(feed => fetchFeedItems(feed.url, feed.source))
+    );
+
+    const allNews: NewsItem[] = [];
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        allNews.push(...result.value);
+      }
+    }
+
+    if (allNews.length === 0) {
+      throw new Error('Nenhum feed retornou notícias');
+    }
+
+    // Ordena por data mais recente e remove duplicatas por título similar
+    const seen = new Set<string>();
+    const deduped = allNews
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .filter(item => {
+        const key = item.title.slice(0, 40).toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
     const cacheData: CacheData = {
-      news,
+      news: deduped,
       timestamp: Date.now()
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
-    
-    return news;
+
+    console.log(`Notícias atualizadas: ${deduped.length} artigos de ${RSS_FEEDS.length} fontes`);
+    return deduped;
+
   } catch (error) {
-    console.error('Erro ao buscar notícias:', error);
-    
-    // Em caso de erro, tenta usar cache antigo
+    console.error('Erro ao buscar notícias dos feeds:', error instanceof Error ? error.message : String(error));
+
+    // Em caso de erro, tenta usar cache antigo (mesmo expirado)
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       const cacheData: CacheData = JSON.parse(cached);
+      console.log('Usando cache expirado como fallback');
       return cacheData.news;
     }
-    
-    // Se não há cache, retorna fallback
+
+    // Último recurso: notícias estáticas de fallback
     return language === 'en' ? FALLBACK_NEWS_EN : FALLBACK_NEWS_PT;
   }
 };
