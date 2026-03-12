@@ -1,11 +1,14 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
 export type Language = 'pt' | 'en'
+export type Theme = 'dark' | 'light'
 
 interface AppContextType {
   language: Language
   setLanguage: (lang: Language) => void
   t: (key: string) => string
+  theme: Theme
+  toggleTheme: () => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -598,12 +601,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return 'pt'
   })
 
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('f1-theme') as Theme) || 'dark'
+    }
+    return 'dark'
+  })
+
   useEffect(() => {
     localStorage.setItem('f1-language', language)
   }, [language])
 
+  useEffect(() => {
+    localStorage.setItem('f1-theme', theme)
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
+
   const setLanguage = (lang: Language) => {
     setLanguageState(lang)
+  }
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark')
   }
 
   const t = (key: string): string => {
@@ -611,7 +630,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AppContext.Provider value={{ language, setLanguage, t }}>
+    <AppContext.Provider value={{ language, setLanguage, t, theme, toggleTheme }}>
       {children}
     </AppContext.Provider>
   )
