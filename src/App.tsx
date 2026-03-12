@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, memo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { 
   ChevronRight, 
   Trophy, 
