@@ -470,14 +470,14 @@ function RegrasSection() {
           </div>
 
           <Tabs defaultValue="carro" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-white/5 mb-8 rounded-xl">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto p-2 gap-2 bg-white/5 mb-8 rounded-xl">
               {['carro', 'motor', 'aerodinamica', 'seguranca'].map((tabValue, i) => {
                 const tabLabels = [t('rules.tab.car'), t('rules.tab.engine'), t('rules.tab.aero'), t('rules.tab.safety')] as string[]
                 return (
                   <TabsTrigger 
                     key={tabValue}
                     value={tabValue}
-                    className="data-[state=active]:bg-[#E10600] data-[state=active]:text-white text-white/60 uppercase text-sm font-semibold tracking-wider rounded-lg"
+                    className="data-[state=active]:bg-[#E10600] data-[state=active]:text-white text-white/60 uppercase text-sm font-semibold tracking-wider rounded-lg h-auto py-3 px-4"
                   >
                     {tabLabels[i]}
                   </TabsTrigger>
