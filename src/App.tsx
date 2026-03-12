@@ -36,7 +36,6 @@ import {
   Tv,
   Globe,
   Bell,
-  Camera
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -1234,59 +1233,6 @@ function CircuitosSection() {
   )
 }
 
-// ==================== GALERIA F1 ====================
-function GaleriaSection() {
-  const { ref, isVisible } = useScrollAnimation()
-  const { t } = useApp()
-
-  const imagens = [
-    { src: '/images/f1-track.jpg', alt: 'F1 cars on track', title: t('gallery.image1.title') },
-    { src: '/images/f1-podium.jpg', alt: 'Podium celebration', title: t('gallery.image2.title') },
-    { src: '/images/f1-car-closeup.jpg', alt: 'F1 car detail', title: t('gallery.image3.title') },
-  ]
-
-  return (
-    <section id="galeria" ref={ref} className="py-32 bg-[#050505]">
-      <div className="section-padding">
-        <div className="max-w-6xl mx-auto">
-          <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <Badge className="mb-4 bg-white/10 text-white border-white/20 rounded-full">
-              <Camera className="w-3.5 h-3.5 mr-1.5" />
-              {t('gallery.badge')}
-            </Badge>
-            <h2 className="font-f1 text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-4">
-              {t('gallery.title')} <span className="text-[#E10600]">F1</span>
-            </h2>
-            <p className="text-white/50 text-lg max-w-2xl mx-auto">
-              {t('gallery.subtitle')}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {imagens.map((img, index) => (
-              <div 
-                key={index}
-                className={`group relative overflow-hidden rounded-2xl aspect-[4/3] transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ transitionDelay: `${index * 0.15}s` }}
-              >
-                <img 
-                  src={img.src} 
-                  alt={img.alt}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <p className="text-white font-semibold">{img.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 // ==================== SISTEMA AUTOMATIZADO ====================
 function SistemaAutomatizadoSection() {
   const { ref, isVisible } = useScrollAnimation()
@@ -1881,8 +1827,6 @@ function AppContent() {
         <OndeAssistirSection />
         <div className="section-divider" />
         <CircuitosSection />
-        <div className="section-divider" />
-        <GaleriaSection />
         <div className="section-divider" />
         <SistemaAutomatizadoSection />
         <div className="section-divider" />
