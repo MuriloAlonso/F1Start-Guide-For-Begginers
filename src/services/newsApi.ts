@@ -119,11 +119,17 @@ const translateText = async (text: string): Promise<string> => {
 };
 
 // Tradução sequencial: 1 artigo por vez, título + resumo em paralelo (máx 2 req simultâneas)
-// Era: 4 artigos × 2 campos = 8 req simultâneas por lote — agora: 2 req simultâneas no total
+// Se a API retornar 429 (rate limit), abandona a tradução e retorna todos em inglês
 const translateNewsItems = async (items: NewsItem[]): Promise<NewsItem[]> => {
   const result: NewsItem[] = [];
+  let rateLimited = false;
 
   for (const item of items) {
+    if (rateLimited) {
+      result.push(item);
+      continue;
+    }
+
     try {
       const [title, summary] = await Promise.all([
         translateText(item.title),
@@ -131,7 +137,13 @@ const translateNewsItems = async (items: NewsItem[]): Promise<NewsItem[]> => {
       ]);
       result.push({ ...item, title: title || item.title, summary: summary || item.summary });
     } catch (err) {
-      console.warn('Falha ao traduzir artigo:', item.title.slice(0, 40), err instanceof Error ? err.message : err);
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes('429')) {
+        rateLimited = true;
+        console.warn('Limite de tradução atingido — exibindo notícias em inglês');
+      } else {
+        console.warn('Falha ao traduzir artigo:', item.title.slice(0, 40), message);
+      }
       result.push(item);
     }
   }
@@ -250,6 +262,16 @@ export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsIte
       const cacheData: CacheData = JSON.parse(cached);
       console.log('Usando cache expirado como fallback');
       return cacheData.news;
+    }
+
+    // Se PT falhou e não há cache PT, usa cache EN como fallback (notícias em inglês)
+    if (language === 'pt') {
+      const enCached = localStorage.getItem(getCacheKey('en'));
+      if (enCached) {
+        console.log('Usando cache EN como fallback para PT');
+        const enCacheData: CacheData = JSON.parse(enCached);
+        return enCacheData.news;
+      }
     }
 
     return [];
