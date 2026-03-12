@@ -45,7 +45,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useAutoUpdate } from '@/hooks/useAutoUpdate'
 import { formatRelativeDate } from '@/services/newsApi'
-import { useF1Data, defaultTeams, defaultRules } from '@/services/f1DataService'
+import { useF1Data, defaultTeams, defaultRules, useConstructorStandings } from '@/services/f1DataService'
 import { AppProvider, useApp } from '@/contexts/AppContext'
 import { LanguageSelector } from '@/components/LanguageSelector'
 import './App.css'
@@ -615,6 +615,7 @@ function EquipesSection() {
   const { data } = useF1Data()
   const { t } = useApp()
   const teams = useMemo(() => data?.teams || defaultTeams, [data])
+  const { getTeamData, loading: standingsLoading } = useConstructorStandings()
 
   return (
     <section id="equipes" ref={ref} className="py-32 bg-black">
@@ -683,9 +684,36 @@ function EquipesSection() {
                       </div>
                       <div className="bg-white/5 p-3 rounded-lg">
                         <span className="text-white/50 text-sm block">{t('teams.points')}</span>
-                        <span className="text-[#E10600] font-bold">{team.points}</span>
+                        {standingsLoading ? (
+                          <span className="text-white/30 font-bold text-sm">...</span>
+                        ) : (() => {
+                          const live = getTeamData(team.name)
+                          return live !== null ? (
+                            <span className="text-[#E10600] font-bold">{live.points} pts</span>
+                          ) : (
+                            <span className="text-white/40 font-bold text-sm">—</span>
+                          )
+                        })()}
                       </div>
                     </div>
+                    {(() => {
+                      const live = getTeamData(team.name)
+                      if (!standingsLoading && live !== null && (live.wins > 0 || live.position > 0)) {
+                        return (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-white/5 p-3 rounded-lg">
+                              <span className="text-white/50 text-sm block">{t('points.title') || 'Posição'}</span>
+                              <span className="text-white font-bold">#{live.position}</span>
+                            </div>
+                            <div className="bg-white/5 p-3 rounded-lg">
+                              <span className="text-white/50 text-sm block">{t('teams.wins') || 'Vitórias'}</span>
+                              <span className="text-white font-bold">{live.wins}</span>
+                            </div>
+                          </div>
+                        )
+                      }
+                      return null
+                    })()}
                     <a 
                       href={team.wikiUrl}
                       target="_blank"

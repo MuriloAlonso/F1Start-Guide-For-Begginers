@@ -332,3 +332,78 @@ export function useF1Data() {
 
 // Exporta dados padrão para uso imediato
 export { defaultRaces, defaultTeams, defaultRules };
+
+// ==================== CONSTRUCTOR STANDINGS ====================
+// Busca pontuação real dos construtores via Jolpica API (substituto oficial do Ergast)
+// Endpoint: https://api.jolpi.ca/ergast/f1/current/constructorStandings.json
+
+const STANDINGS_CACHE_KEY = 'f1_constructor_standings_v1';
+const STANDINGS_CACHE_DURATION = 30 * 60 * 1000; // 30 minutos
+
+export interface ConstructorStanding {
+  constructorId: string;
+  name: string;
+  points: number;
+  wins: number;
+  position: number;
+}
+
+export async function fetchConstructorStandings(): Promise<ConstructorStanding[]> {
+  try {
+    const cached = localStorage.getItem(STANDINGS_CACHE_KEY);
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < STANDINGS_CACHE_DURATION) return data;
+    }
+  } catch {}
+
+  const res = await fetch('https://api.jolpi.ca/ergast/f1/current/constructorStandings.json');
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+
+  const raw = json?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings ?? [];
+
+  const result: ConstructorStanding[] = raw.map((s: Record<string, unknown>) => ({
+    constructorId: (s.Constructor as Record<string, string>).constructorId,
+    name: (s.Constructor as Record<string, string>).name,
+    points: parseFloat(s.points as string),
+    wins: parseInt(s.wins as string),
+    position: parseInt(s.position as string),
+  }));
+
+  try {
+    localStorage.setItem(STANDINGS_CACHE_KEY, JSON.stringify({ data: result, timestamp: Date.now() }));
+  } catch {}
+
+  return result;
+}
+
+export function useConstructorStandings() {
+  const [standings, setStandings] = useState<ConstructorStanding[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchConstructorStandings()
+      .then(setStandings)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+
+    const interval = setInterval(() => {
+      fetchConstructorStandings().then(setStandings).catch(() => {});
+    }, STANDINGS_CACHE_DURATION);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getTeamData = (teamName: string): { points: number; wins: number; position: number } | null => {
+    if (standings.length === 0) return null;
+    const normalized = teamName.toLowerCase().replace(/[\s\-_]/g, '');
+    const match = standings.find(s => {
+      const sn = s.name.toLowerCase().replace(/[\s\-_]/g, '');
+      return sn.includes(normalized) || normalized.includes(sn) || normalized.startsWith(sn.slice(0, 5));
+    });
+    return match ? { points: match.points, wins: match.wins, position: match.position } : null;
+  };
+
+  return { standings, loading, getTeamData };
+}
