@@ -685,7 +685,7 @@ function EquipesSection() {
                 </DialogTrigger>
                 <DialogContent className="bg-[#0a0a0a] border-white/10 text-white max-w-md">
                   <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold" style={{ color: team.color }}>{team.name}</DialogTitle>
+                    <DialogTitle className="text-2xl font-bold" style={{ color: team.color === '#000000' ? '#FFFFFF' : team.color }}>{team.name}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     <div>
