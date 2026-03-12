@@ -668,7 +668,6 @@ function EquipesSection() {
                     className={`f1-card p-5 text-left group relative overflow-hidden transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                     style={{ transitionDelay: `${index * 0.05}s` }}
                   >
-                    <span className="team-position-badge">#{team.position}</span>
                     <div className="team-color-bar" style={{ backgroundColor: team.color }} />
                     <h3 className="font-f1 text-xl text-white mb-0.5 group-hover:text-[#E10600] transition-colors">{team.name}</h3>
                     <p className="text-white/30 text-xs mb-3 truncate">{team.fullName}</p>
