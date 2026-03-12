@@ -174,7 +174,7 @@ function Navigation() {
     <>
       {/* Header fixo - sempre visível com fundo */}
       <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
-        isScrolled || isMobileMenuOpen ? 'bg-black border-b border-white/10' : 'bg-black/80 backdrop-blur-sm'
+        isScrolled || isMobileMenuOpen ? 'header-scrolled' : 'bg-black/80 backdrop-blur-sm'
       }`}>
         <div className="section-padding">
           <div className="flex items-center justify-between h-20">
@@ -192,7 +192,7 @@ function Navigation() {
                 <a
                   key={item.href}
                   href={item.href}
-                  className="px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                  className="nav-item-link px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all"
                 >
                   {item.label}
                 </a>
@@ -241,6 +241,39 @@ function Navigation() {
   )
 }
 
+// ==================== STAT CARD (animação visual de contagem) ====================
+function StatCard({ value, label }: { value: string; label: string }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const [display, setDisplay] = useState(value)
+  const numericPart = parseInt(value, 10)
+  const suffix = isNaN(numericPart) ? '' : value.replace(/[0-9]/g, '')
+
+  useEffect(() => {
+    if (!isHovered || isNaN(numericPart)) { setDisplay(value); return }
+    const steps = 14
+    const intervalMs = 300 / steps
+    let step = 0
+    const timer = setInterval(() => {
+      step++
+      const current = Math.round((numericPart / steps) * step)
+      setDisplay(step >= steps ? value : current + suffix)
+      if (step >= steps) clearInterval(timer)
+    }, intervalMs)
+    return () => clearInterval(timer)
+  }, [isHovered, value, numericPart, suffix])
+
+  return (
+    <div
+      className="stat-glass p-6"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="font-mono-stat text-3xl sm:text-4xl font-bold text-[#E10600]">{display}</div>
+      <div className="text-sm text-white/40 mt-1 uppercase tracking-wider">{label}</div>
+    </div>
+  )
+}
+
 // ==================== HERO SECTION ====================
 function HeroSection() {
   const { t } = useApp()
@@ -256,6 +289,8 @@ function HeroSection() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(225,6,0,0.2),_transparent_50%)]" />
+        <div className="speed-lines" />
+        <div className="hero-brake-glow" />
       </div>
 
       <div className="absolute top-1/4 left-0 w-32 h-64 opacity-20 tire-pattern transform -rotate-12" />
@@ -270,9 +305,9 @@ function HeroSection() {
             </Badge>
           </div>
           
-          <h1 className="font-f1 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-medium text-white mb-6 leading-[0.95] animate-fade-in-up">
+          <h1 className="font-f1 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light text-white mb-6 leading-[0.95] animate-fade-in-up">
             {t('hero.title')}{' '}
-            <span className="text-gradient">Fórmula 1</span>
+            <span className="text-gradient font-bold">Fórmula 1</span>
           </h1>
           
           <p className="text-lg sm:text-xl text-white/50 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up delay-200">
@@ -282,19 +317,19 @@ function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-300">
             <Button 
               size="lg" 
-              className="bg-[#E10600] hover:bg-[#b80500] text-white px-8 py-6 text-lg font-semibold rounded-xl animate-pulse-glow"
+              className="bg-[#E10600] hover:bg-[#b80500] text-white px-8 py-6 text-lg font-semibold rounded-xl animate-pulse-glow btn-f1-glow btn-arrow-slide"
               onClick={() => document.getElementById('regras')?.scrollIntoView({ behavior: 'smooth' })}
             >
               {t('hero.cta.rules')} {CURRENT_YEAR}
-              <ChevronRight className="w-5 h-5 ml-2" />
+              <ChevronRight className="w-5 h-5 ml-2 arrow-icon" />
             </Button>
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl"
+              className="border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl flex items-center gap-3"
               onClick={() => document.getElementById('noticias')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              <Radio className="w-5 h-5 mr-2" />
+              <span className="live-dot" />
               {t('hero.cta.news')}
             </Button>
           </div>
@@ -306,19 +341,14 @@ function HeroSection() {
               { value: '22', label: t('hero.stats.drivers') },
               { value: '768kg', label: t('hero.stats.weight') },
             ].map((stat, index) => (
-              <div key={index} className="glass rounded-2xl p-6">
-                <div className="font-f1 text-3xl sm:text-4xl font-semibold text-[#E10600]">{stat.value}</div>
-                <div className="text-sm text-white/40 mt-1 uppercase tracking-wider">
-                  {stat.label}
-                </div>
-              </div>
+              <StatCard key={index} value={stat.value} label={stat.label} />
             ))}
           </div>
         </div>
       </div>
 
       <div className="absolute bottom-8 left-1/2 animate-bounce-arrow">
-        <ArrowDown className="w-8 h-8 text-white/40" />
+        <ArrowDown className="w-8 h-8 text-white/40 scroll-indicator" />
       </div>
     </section>
   )
