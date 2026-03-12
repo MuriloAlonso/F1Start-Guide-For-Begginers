@@ -102,12 +102,25 @@ const fetchWithTimeout = (url: string, ms: number): Promise<Response> => {
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
 };
 
-// Tradução via MyMemory API — suporta CORS no browser, gratuito, sem chave
-// Docs: https://mymemory.translated.net/doc/spec.php
+// Tradução via Google Translate (endpoint público, sem chave, alto limite)
+const GOOGLE_TRANSLATE_URL = 'https://translate.googleapis.com/translate_a/single';
 const MYMEMORY_URL = 'https://api.mymemory.translated.net/get';
 
-const translateText = async (text: string): Promise<string> => {
-  const truncated = text.slice(0, 480); // MyMemory limita 500 chars por requisição
+// Tentativa 1: Google Translate público (sem chave, limite muito maior)
+const translateWithGoogle = async (text: string): Promise<string> => {
+  const url = `${GOOGLE_TRANSLATE_URL}?client=gtx&sl=en&tl=pt-BR&dt=t&q=${encodeURIComponent(text)}`;
+  const response = await fetchWithTimeout(url, 8000);
+  if (!response.ok) throw new Error(`Google Translate HTTP ${response.status}`);
+  const data = await response.json();
+  // Resposta: [[[translatedChunk, original], ...], ...]
+  const translated = (data[0] as [string, string][]).map(d => d[0]).join('');
+  if (!translated) throw new Error('Google Translate: resposta vazia');
+  return translated;
+};
+
+// Tentativa 2: MyMemory como fallback
+const translateWithMyMemory = async (text: string): Promise<string> => {
+  const truncated = text.slice(0, 480);
   const url = `${MYMEMORY_URL}?q=${encodeURIComponent(truncated)}&langpair=en|pt-BR`;
   const response = await fetchWithTimeout(url, 8000);
   if (!response.ok) throw new Error(`MyMemory HTTP ${response.status}`);
@@ -116,6 +129,14 @@ const translateText = async (text: string): Promise<string> => {
     throw new Error(`MyMemory status: ${data.responseStatus}`);
   }
   return data.responseData?.translatedText || text;
+};
+
+const translateText = async (text: string): Promise<string> => {
+  try {
+    return await translateWithGoogle(text);
+  } catch {
+    return await translateWithMyMemory(text);
+  }
 };
 
 // Tradução sequencial: 1 artigo por vez, título + resumo em paralelo (máx 2 req simultâneas)
@@ -138,7 +159,7 @@ const translateNewsItems = async (items: NewsItem[]): Promise<NewsItem[]> => {
       result.push({ ...item, title: title || item.title, summary: summary || item.summary });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      if (message.includes('429')) {
+      if (message.includes('429') || message.includes('rate') || message.includes('quota')) {
         rateLimited = true;
         console.warn('Limite de tradução atingido — exibindo notícias em inglês');
       } else {
