@@ -689,7 +689,7 @@ function EquipesSection() {
                         ) : (() => {
                           const live = getTeamData(team.name)
                           return live !== null ? (
-                            <span className="text-[#E10600] font-bold">{live.points} pts</span>
+                            <span className="text-white font-bold">{live.points} pts</span>
                           ) : null
                         })()}
                       </div>
