@@ -803,33 +803,18 @@ function CalendarioSection() {
             </div>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <a
-                href={`https://www.formula1.com/en/racing/${CURRENT_YEAR}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-sm transition-colors"
-              >
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/5 text-white/70 rounded-lg text-sm">
                 <MapPin className="w-4 h-4" />
                 {t('calendar.circuits')}
-              </a>
-              <a
-                href={`https://www.formula1.com/en/racing/${CURRENT_YEAR}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-sm transition-colors"
-              >
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/5 text-white/70 rounded-lg text-sm">
                 <Clock className="w-4 h-4" />
                 {t('calendar.times')}
-              </a>
-              <a
-                href={`https://www.formula1.com/en/racing/${CURRENT_YEAR}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-sm transition-colors"
-              >
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/5 text-white/70 rounded-lg text-sm">
                 <Flag className="w-4 h-4" />
                 {t('calendar.results')}
-              </a>
+              </div>
             </div>
           </div>
         </div>
