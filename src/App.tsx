@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, memo } from 'react'
 import { 
   ChevronRight, 
   Trophy, 
@@ -50,6 +50,61 @@ import { AppProvider, useApp } from '@/contexts/AppContext'
 import { LanguageSelector } from '@/components/LanguageSelector'
 import './App.css'
 
+// ==================== CONSTANTES DE MÓDULO (calculadas uma única vez) ====================
+const CURRENT_YEAR = new Date().getFullYear()
+
+const DRIVER_LINKS: Record<string, string> = {
+  'Lando Norris': 'https://en.wikipedia.org/wiki/Lando_Norris',
+  'Oscar Piastri': 'https://en.wikipedia.org/wiki/Oscar_Piastri',
+  'Charles Leclerc': 'https://en.wikipedia.org/wiki/Charles_Leclerc',
+  'Lewis Hamilton': 'https://en.wikipedia.org/wiki/Lewis_Hamilton',
+  'Max Verstappen': 'https://en.wikipedia.org/wiki/Max_Verstappen',
+  'Isack Hadjar': 'https://en.wikipedia.org/wiki/Isack_Hadjar',
+  'George Russell': 'https://en.wikipedia.org/wiki/George_Russell_(racing_driver)',
+  'Kimi Antonelli': 'https://en.wikipedia.org/wiki/Andrea_Kimi_Antonelli',
+  'Fernando Alonso': 'https://en.wikipedia.org/wiki/Fernando_Alonso',
+  'Lance Stroll': 'https://en.wikipedia.org/wiki/Lance_Stroll',
+  'Pierre Gasly': 'https://en.wikipedia.org/wiki/Pierre_Gasly',
+  'Franco Colapinto': 'https://en.wikipedia.org/wiki/Franco_Colapinto',
+  'Carlos Sainz': 'https://en.wikipedia.org/wiki/Carlos_Sainz_Jr.',
+  'Alexander Albon': 'https://en.wikipedia.org/wiki/Alexander_Albon',
+  'Yuki Tsunoda': 'https://en.wikipedia.org/wiki/Yuki_Tsunoda',
+  'Liam Lawson': 'https://en.wikipedia.org/wiki/Liam_Lawson',
+  'Esteban Ocon': 'https://en.wikipedia.org/wiki/Esteban_Ocon',
+  'Oliver Bearman': 'https://en.wikipedia.org/wiki/Oliver_Bearman',
+  'Nico Hulkenberg': 'https://en.wikipedia.org/wiki/Nico_H%C3%BClkenberg',
+  'Gabriel Bortoleto': 'https://en.wikipedia.org/wiki/Gabriel_Bortoleto',
+  'Valtteri Bottas': 'https://en.wikipedia.org/wiki/Valtteri_Bottas',
+  'Sergio Perez': 'https://en.wikipedia.org/wiki/Sergio_P%C3%A9rez',
+}
+
+const CIRCUITOS_DATA = [
+  { name: 'Albert Park Circuit', gp: 'GP da Austrália', city: 'Melbourne', country: 'Austrália', flag: '🇦🇺', image: '/images/circuit-albert-park.jpg', description: 'Circuito urbano ao redor do Lago Albert Park, conhecido por suas curvas rápidas e belo cenário.', length: '5.278 km', laps: 58, wikiUrl: 'https://en.wikipedia.org/wiki/Melbourne_Grand_Prix_Circuit' },
+  { name: 'Shanghai International Circuit', gp: 'GP da China', city: 'Shanghai', country: 'China', flag: '🇨🇳', image: '/images/circuit-shanghai.png', description: 'Circuito moderno com uma das retas mais longas da F1, desenhado por Hermann Tilke.', length: '5.451 km', laps: 56, wikiUrl: 'https://en.wikipedia.org/wiki/Shanghai_International_Circuit' },
+  { name: 'Suzuka International Racing Course', gp: 'GP do Japão', city: 'Suzuka', country: 'Japão', flag: '🇯🇵', image: '/images/circuit-suzuka.jpg', description: 'Único circuito em forma de 8 do Mundial, famoso por exigir máxima precisão dos pilotos.', length: '5.807 km', laps: 53, wikiUrl: 'https://en.wikipedia.org/wiki/Suzuka_Circuit' },
+  { name: 'Bahrain International Circuit', gp: 'GP do Bahrein', city: 'Sakhir', country: 'Bahrein', flag: '🇧🇭', image: '/images/circuit-bahrain-new.jpg', description: 'Primeiro circuito da F1 no Oriente Médio, conhecido por suas corridas noturnas espetaculares.', length: '5.412 km', laps: 57, wikiUrl: 'https://en.wikipedia.org/wiki/Bahrain_International_Circuit' },
+  { name: 'Jeddah Street Circuit', gp: 'GP da Arábia Saudita', city: 'Jeddah', country: 'Arábia Saudita', flag: '🇸🇦', image: '/images/circuit-jeddah.webp', description: 'Circuito urbano à beira-mar, o mais rápido do calendário com curvas de alta velocidade.', length: '6.174 km', laps: 50, wikiUrl: 'https://en.wikipedia.org/wiki/Jeddah_Street_Circuit' },
+  { name: 'Miami International Autodrome', gp: 'GP de Miami', city: 'Miami', country: 'EUA', flag: '🇺🇸', image: '/images/circuit-miami.jpg', description: 'Circuito urbano ao redor do Hard Rock Stadium, palco de uma das festas mais badaladas da F1.', length: '5.412 km', laps: 57, wikiUrl: 'https://en.wikipedia.org/wiki/Miami_International_Autodrome' },
+  { name: 'Autodromo Enzo e Dino Ferrari', gp: 'GP da Emília-Romanha', city: 'Imola', country: 'Itália', flag: '🇮🇹', image: '/images/circuit-imola.jpeg', description: 'Circuito histórico onde Ayrton Senna conquistou vitórias memoráveis.', length: '4.909 km', laps: 63, wikiUrl: 'https://en.wikipedia.org/wiki/Autodromo_Enzo_e_Dino_Ferrari' },
+  { name: 'Circuit de Monaco', gp: 'GP de Mônaco', city: 'Monte Carlo', country: 'Mônaco', flag: '🇲🇨', image: '/images/circuit-monaco.webp', description: 'A joia da coroa da F1, corrida nas ruas do principado mais famoso do mundo.', length: '3.337 km', laps: 78, wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_de_Monaco' },
+  { name: 'Circuit Gilles Villeneuve', gp: 'GP do Canadá', city: 'Montreal', country: 'Canadá', flag: '🇨🇦', image: '/images/circuit-canada.jpg', description: 'Circuito urbano na Ilha de Notre-Dame, famoso pelo "Muro dos Campeões".', length: '4.361 km', laps: 70, wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_Gilles_Villeneuve' },
+  { name: 'Circuit de Barcelona-Catalunya', gp: 'GP da Espanha', city: 'Barcelona', country: 'Espanha', flag: '🇪🇸', image: '/images/circuit-barcelona.jpg', description: 'Circuito técnico usado para testes de pré-temporada, com curvas de todos os tipos.', length: '4.675 km', laps: 66, wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_de_Barcelona-Catalunya' },
+  { name: 'Red Bull Ring', gp: 'GP da Áustria', city: 'Spielberg', country: 'Áustria', flag: '🇦🇹', image: '/images/circuit-redbullring.jpg', description: 'Circuito curto e rápido nas montanhas da Estíria, com poucas curvas mas muita ação.', length: '4.318 km', laps: 71, wikiUrl: 'https://en.wikipedia.org/wiki/Red_Bull_Ring' },
+  { name: 'Silverstone Circuit', gp: 'GP da Grã-Bretanha', city: 'Silverstone', country: 'Reino Unido', flag: '🇬🇧', image: '/images/circuit-silverstone.jpg', description: 'O berço da Fórmula 1, palco da primeira corrida do Mundial em 1950.', length: '5.891 km', laps: 52, wikiUrl: 'https://en.wikipedia.org/wiki/Silverstone_Circuit' },
+  { name: 'Hungaroring', gp: 'GP da Hungria', city: 'Budapeste', country: 'Hungria', flag: '🇭🇺', image: '/images/circuit-hungaroring.jpg', description: 'Circuito semelhante a um kartódromo, com poucas oportunidades de ultrapassagem.', length: '4.381 km', laps: 70, wikiUrl: 'https://en.wikipedia.org/wiki/Hungaroring' },
+  { name: 'Circuit de Spa-Francorchamps', gp: 'GP da Bélgica', city: 'Spa', country: 'Bélgica', flag: '🇧🇪', image: '/images/circuit-spa.jpg', description: 'Um dos circuitos mais desafiadores do mundo, famoso pela curva Eau Rouge.', length: '7.004 km', laps: 44, wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps' },
+  { name: 'Circuit Zandvoort', gp: 'GP da Holanda', city: 'Zandvoort', country: 'Holanda', flag: '🇳🇱', image: '/images/circuit-zandvoort.jpg', description: 'Circuito à beira-mar com inclinações únicas, palco da festa laranja de Verstappen.', length: '4.259 km', laps: 72, wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_Zandvoort' },
+  { name: 'Autodromo Nazionale Monza', gp: 'GP da Itália', city: 'Monza', country: 'Itália', flag: '🇮🇹', image: '/images/circuit-monza.jpg', description: 'O Templo da Velocidade, casa da Ferrari e das retas mais rápidas da F1.', length: '5.793 km', laps: 53, wikiUrl: 'https://en.wikipedia.org/wiki/Autodromo_Nazionale_Monza' },
+  { name: 'Baku City Circuit', gp: 'GP do Azerbaijão', city: 'Baku', country: 'Azerbaijão', flag: '🇦🇿', image: '/images/circuit-baku-new.jpg', description: 'Circuito urbano no centro histórico, com a reta mais longa da F1.', length: '6.003 km', laps: 51, wikiUrl: 'https://en.wikipedia.org/wiki/Baku_City_Circuit' },
+  { name: 'Marina Bay Street Circuit', gp: 'GP de Singapura', city: 'Singapura', country: 'Singapura', flag: '🇸🇬', image: '/images/circuit-singapore.jpg', description: 'Primeira corrida noturna da F1, circuito urbano desafiador e úmido.', length: '4.940 km', laps: 62, wikiUrl: 'https://en.wikipedia.org/wiki/Marina_Bay_Street_Circuit' },
+  { name: 'Circuit of the Americas', gp: 'GP dos EUA', city: 'Austin', country: 'EUA', flag: '🇺🇸', image: '/images/circuit-austin.jpg', description: 'Circuito moderno inspirado em Silverstone, com uma das melhores arquibancadas da F1.', length: '5.513 km', laps: 56, wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_of_the_Americas' },
+  { name: 'Autódromo Hermanos Rodríguez', gp: 'GP do México', city: 'Cidade do México', country: 'México', flag: '🇲🇽', image: '/images/circuit-mexico.jpg', description: 'Circuito a 2.200m de altitude, famoso pelo estádio de beisebol nas curvas finais.', length: '4.304 km', laps: 71, wikiUrl: 'https://en.wikipedia.org/wiki/Aut%C3%B3dromo_Hermanos_Rodr%C3%ADguez' },
+  { name: 'Interlagos', gp: 'GP do Brasil', city: 'São Paulo', country: 'Brasil', flag: '🇧🇷', image: '/images/circuit-interlagos.jpg', description: 'Autódromo José Carlos Pace, palco de momentos históricos como o tricampeonato de Senna.', length: '4.309 km', laps: 71, wikiUrl: 'https://en.wikipedia.org/wiki/Aut%C3%B3dromo_Jos%C3%A9_Carlos_Pace' },
+  { name: 'Las Vegas Strip Circuit', gp: 'GP de Las Vegas', city: 'Las Vegas', country: 'EUA', flag: '🇺🇸', image: '/images/circuit-lasvegas.png', description: 'Corrida noturna na Strip de Las Vegas, com o cassino Sphere como cenário.', length: '6.201 km', laps: 50, wikiUrl: 'https://en.wikipedia.org/wiki/Las_Vegas_Strip_Circuit' },
+  { name: 'Lusail International Circuit', gp: 'GP do Catar', city: 'Lusail', country: 'Catar', flag: '🇶🇦', image: '/images/circuit-lusail.jpg', description: 'Circuito moderno no deserto, palco da primeira corrida noturna do Oriente Médio.', length: '5.419 km', laps: 57, wikiUrl: 'https://en.wikipedia.org/wiki/Lusail_International_Circuit' },
+  { name: 'Yas Marina Circuit', gp: 'GP de Abu Dhabi', city: 'Abu Dhabi', country: 'Emirados Árabes', flag: '🇦🇪', image: '/images/circuit-yasmarina.jpg', description: 'Circuito desenhado por Hermann Tilke, palco da decisão do campeonato.', length: '5.281 km', laps: 58, wikiUrl: 'https://en.wikipedia.org/wiki/Yas_Marina_Circuit' },
+]
+
 // ==================== HOOKS ====================
 function useScrollAnimation() {
   const ref = useRef<HTMLDivElement>(null)
@@ -80,13 +135,12 @@ function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { t } = useApp()
-  const currentYear = new Date().getFullYear()
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -104,8 +158,8 @@ function Navigation() {
   const navItems = [
     { label: t('nav.home'), href: '#hero' },
     { label: t('nav.whatisf1'), href: '#o-que-e' },
-    { label: `${t('nav.rules')} ${currentYear}`, href: '#regras' },
-    { label: `${t('nav.teams')} ${currentYear}`, href: '#equipes' },
+    { label: `${t('nav.rules')} ${CURRENT_YEAR}`, href: '#regras' },
+    { label: `${t('nav.teams')} ${CURRENT_YEAR}`, href: '#equipes' },
     { label: t('nav.calendar'), href: '#calendario' },
     { label: t('nav.points'), href: '#pontuacao' },
     { label: t('nav.watch'), href: '#onde-assistir' },
@@ -189,7 +243,6 @@ function Navigation() {
 
 // ==================== HERO SECTION ====================
 function HeroSection() {
-  const currentYear = new Date().getFullYear()
   const { t } = useApp()
   
   return (
@@ -213,7 +266,7 @@ function HeroSection() {
           <div className="mb-8 animate-fade-in">
             <Badge className="bg-[#E10600]/20 text-[#E10600] border-[#E10600]/30 hover:bg-[#E10600]/30 px-4 py-1.5 text-sm rounded-full">
               <Zap className="w-3.5 h-3.5 mr-1.5" />
-              {t('hero.season')} {currentYear}
+              {t('hero.season')} {CURRENT_YEAR}
             </Badge>
           </div>
           
@@ -232,7 +285,7 @@ function HeroSection() {
               className="bg-[#E10600] hover:bg-[#b80500] text-white px-8 py-6 text-lg font-semibold rounded-xl animate-pulse-glow"
               onClick={() => document.getElementById('regras')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              {t('hero.cta.rules')} {currentYear}
+              {t('hero.cta.rules')} {CURRENT_YEAR}
               <ChevronRight className="w-5 h-5 ml-2" />
             </Button>
             <Button 
@@ -366,10 +419,9 @@ function OQueESection() {
 // ==================== REGRAS ====================
 function RegrasSection() {
   const { ref, isVisible } = useScrollAnimation()
-  const currentYear = new Date().getFullYear()
   const { data } = useF1Data()
   const { t } = useApp()
-  const rules = data?.rules || defaultRules
+  const rules = useMemo(() => data?.rules || defaultRules, [data])
 
   return (
     <section id="regras" ref={ref} className="py-32 bg-[#050505] relative overflow-hidden">
@@ -384,10 +436,10 @@ function RegrasSection() {
               {t('rules.badge')}
             </Badge>
             <h2 className="font-f1 text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-4">
-              {t('rules.title')} <span className="text-[#E10600]">{currentYear}</span>
+              {t('rules.title')} <span className="text-[#E10600]">{CURRENT_YEAR}</span>
             </h2>
             <p className="text-white/50 text-lg max-w-2xl mx-auto">
-              {currentYear} {t('rules.subtitle')}
+              {CURRENT_YEAR} {t('rules.subtitle')}
             </p>
           </div>
 
@@ -560,35 +612,9 @@ function RegrasSection() {
 // ==================== EQUIPES ====================
 function EquipesSection() {
   const { ref, isVisible } = useScrollAnimation()
-  const currentYear = new Date().getFullYear()
   const { data } = useF1Data()
   const { t } = useApp()
-  const teams = data?.teams || defaultTeams
-
-  const driverLinks: Record<string, string> = {
-    'Lando Norris': 'https://en.wikipedia.org/wiki/Lando_Norris',
-    'Oscar Piastri': 'https://en.wikipedia.org/wiki/Oscar_Piastri',
-    'Charles Leclerc': 'https://en.wikipedia.org/wiki/Charles_Leclerc',
-    'Lewis Hamilton': 'https://en.wikipedia.org/wiki/Lewis_Hamilton',
-    'Max Verstappen': 'https://en.wikipedia.org/wiki/Max_Verstappen',
-    'Isack Hadjar': 'https://en.wikipedia.org/wiki/Isack_Hadjar',
-    'George Russell': 'https://en.wikipedia.org/wiki/George_Russell_(racing_driver)',
-    'Kimi Antonelli': 'https://en.wikipedia.org/wiki/Andrea_Kimi_Antonelli',
-    'Fernando Alonso': 'https://en.wikipedia.org/wiki/Fernando_Alonso',
-    'Lance Stroll': 'https://en.wikipedia.org/wiki/Lance_Stroll',
-    'Pierre Gasly': 'https://en.wikipedia.org/wiki/Pierre_Gasly',
-    'Franco Colapinto': 'https://en.wikipedia.org/wiki/Franco_Colapinto',
-    'Carlos Sainz': 'https://en.wikipedia.org/wiki/Carlos_Sainz_Jr.',
-    'Alexander Albon': 'https://en.wikipedia.org/wiki/Alexander_Albon',
-    'Yuki Tsunoda': 'https://en.wikipedia.org/wiki/Yuki_Tsunoda',
-    'Liam Lawson': 'https://en.wikipedia.org/wiki/Liam_Lawson',
-    'Esteban Ocon': 'https://en.wikipedia.org/wiki/Esteban_Ocon',
-    'Oliver Bearman': 'https://en.wikipedia.org/wiki/Oliver_Bearman',
-    'Nico Hulkenberg': 'https://en.wikipedia.org/wiki/Nico_H%C3%BClkenberg',
-    'Gabriel Bortoleto': 'https://en.wikipedia.org/wiki/Gabriel_Bortoleto',
-    'Valtteri Bottas': 'https://en.wikipedia.org/wiki/Valtteri_Bottas',
-    'Sergio Perez': 'https://en.wikipedia.org/wiki/Sergio_P%C3%A9rez',
-  }
+  const teams = useMemo(() => data?.teams || defaultTeams, [data])
 
   return (
     <section id="equipes" ref={ref} className="py-32 bg-black">
@@ -597,13 +623,13 @@ function EquipesSection() {
           <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <Badge className="mb-4 bg-white/10 text-white border-white/20 rounded-full">
               <Users className="w-3.5 h-3.5 mr-1.5" />
-              {t('teams.badge')} {currentYear}
+              {t('teams.badge')} {CURRENT_YEAR}
             </Badge>
             <h2 className="font-f1 text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-4">
-              {t('teams.title')} <span className="text-[#E10600]">{teams.length} {t('nav.teams')}</span> {t('hero.season')} {currentYear}
+              {t('teams.title')} <span className="text-[#E10600]">{teams.length} {t('nav.teams')}</span> {t('hero.season')} {CURRENT_YEAR}
             </h2>
             <p className="text-white/50 text-lg max-w-2xl mx-auto">
-              {t('teams.subtitle')} {currentYear}.
+              {t('teams.subtitle')} {CURRENT_YEAR}.
             </p>
           </div>
 
@@ -639,7 +665,7 @@ function EquipesSection() {
                         {team.drivers.map((driver, i) => (
                           <a 
                             key={i} 
-                            href={driverLinks[driver] || '#'} 
+                            href={DRIVER_LINKS[driver] || '#'} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="bg-white/5 p-3 flex items-center justify-between rounded-lg hover:bg-white/10 transition-colors group"
@@ -683,7 +709,6 @@ function EquipesSection() {
 // ==================== CALENDÁRIO - SÓ BOTÃO ====================
 function CalendarioSection() {
   const { ref, isVisible } = useScrollAnimation()
-  const currentYear = new Date().getFullYear()
   const { t } = useApp()
 
   return (
@@ -693,13 +718,13 @@ function CalendarioSection() {
           <div className={`text-center mb-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <Badge className="mb-4 bg-white/10 text-white border-white/20 rounded-full">
               <Calendar className="w-3.5 h-3.5 mr-1.5" />
-              {t('calendar.badge')} {currentYear}
+              {t('calendar.badge')} {CURRENT_YEAR}
             </Badge>
             <h2 className="font-f1 text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-4">
               {t('calendar.title')} <span className="text-[#E10600]">{t('nav.calendar')}</span>
             </h2>
             <p className="text-white/50 text-lg max-w-2xl mx-auto">
-              {t('calendar.subtitle')} {currentYear}.
+              {t('calendar.subtitle')} {CURRENT_YEAR}.
             </p>
           </div>
 
@@ -713,7 +738,7 @@ function CalendarioSection() {
                 {t('calendar.official.desc')}
               </p>
               <a
-                href={`https://www.formula1.com/en/racing/${currentYear}`}
+                href={`https://www.formula1.com/en/racing/${CURRENT_YEAR}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 bg-[#E10600] hover:bg-[#b80500] text-white rounded-xl font-semibold transition-colors"
@@ -725,7 +750,7 @@ function CalendarioSection() {
 
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href={`https://www.formula1.com/en/racing/${currentYear}`}
+                href={`https://www.formula1.com/en/racing/${CURRENT_YEAR}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-sm transition-colors"
@@ -734,7 +759,7 @@ function CalendarioSection() {
                 {t('calendar.circuits')}
               </a>
               <a
-                href={`https://www.formula1.com/en/racing/${currentYear}`}
+                href={`https://www.formula1.com/en/racing/${CURRENT_YEAR}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-sm transition-colors"
@@ -743,7 +768,7 @@ function CalendarioSection() {
                 {t('calendar.times')}
               </a>
               <a
-                href={`https://www.formula1.com/en/racing/${currentYear}`}
+                href={`https://www.formula1.com/en/racing/${CURRENT_YEAR}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-sm transition-colors"
@@ -1003,298 +1028,8 @@ function OndeAssistirSection() {
 
 // ==================== CIRCUITOS ====================
 function CircuitosSection() {
-  const [selectedCircuito, setSelectedCircuito] = useState<typeof circuitos[0] | null>(null)
+  const [selectedCircuito, setSelectedCircuito] = useState<typeof CIRCUITOS_DATA[0] | null>(null)
 
-  const circuitos = [
-    {
-      name: 'Albert Park Circuit',
-      gp: 'GP da Austrália',
-      city: 'Melbourne',
-      country: 'Austrália',
-      flag: '🇦🇺',
-      image: '/images/circuit-albert-park.jpg',
-      description: 'Circuito urbano ao redor do Lago Albert Park, conhecido por suas curvas rápidas e belo cenário.',
-      length: '5.278 km',
-      laps: 58,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Melbourne_Grand_Prix_Circuit'
-    },
-    {
-      name: 'Shanghai International Circuit',
-      gp: 'GP da China',
-      city: 'Shanghai',
-      country: 'China',
-      flag: '🇨🇳',
-      image: '/images/circuit-shanghai.png',
-      description: 'Circuito moderno com uma das retas mais longas da F1, desenhado por Hermann Tilke.',
-      length: '5.451 km',
-      laps: 56,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Shanghai_International_Circuit'
-    },
-    {
-      name: 'Suzuka International Racing Course',
-      gp: 'GP do Japão',
-      city: 'Suzuka',
-      country: 'Japão',
-      flag: '🇯🇵',
-      image: '/images/circuit-suzuka.jpg',
-      description: 'Único circuito em forma de 8 do Mundial, famoso por exigir máxima precisão dos pilotos.',
-      length: '5.807 km',
-      laps: 53,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Suzuka_Circuit'
-    },
-    {
-      name: 'Bahrain International Circuit',
-      gp: 'GP do Bahrein',
-      city: 'Sakhir',
-      country: 'Bahrein',
-      flag: '🇧🇭',
-      image: '/images/circuit-bahrain-new.jpg',
-      description: 'Primeiro circuito da F1 no Oriente Médio, conhecido por suas corridas noturnas espetaculares.',
-      length: '5.412 km',
-      laps: 57,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Bahrain_International_Circuit'
-    },
-    {
-      name: 'Jeddah Street Circuit',
-      gp: 'GP da Arábia Saudita',
-      city: 'Jeddah',
-      country: 'Arábia Saudita',
-      flag: '🇸🇦',
-      image: '/images/circuit-jeddah.webp',
-      description: 'Circuito urbano à beira-mar, o mais rápido do calendário com curvas de alta velocidade.',
-      length: '6.174 km',
-      laps: 50,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Jeddah_Street_Circuit'
-    },
-    {
-      name: 'Miami International Autodrome',
-      gp: 'GP de Miami',
-      city: 'Miami',
-      country: 'EUA',
-      flag: '🇺🇸',
-      image: '/images/circuit-miami.jpg',
-      description: 'Circuito urbano ao redor do Hard Rock Stadium, palco de uma das festas mais badaladas da F1.',
-      length: '5.412 km',
-      laps: 57,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Miami_International_Autodrome'
-    },
-    {
-      name: 'Autodromo Enzo e Dino Ferrari',
-      gp: 'GP da Emília-Romanha',
-      city: 'Imola',
-      country: 'Itália',
-      flag: '🇮🇹',
-      image: '/images/circuit-imola.jpeg',
-      description: 'Circuito histórico onde Ayrton Senna conquistou vitórias memoráveis.',
-      length: '4.909 km',
-      laps: 63,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Autodromo_Enzo_e_Dino_Ferrari'
-    },
-    {
-      name: 'Circuit de Monaco',
-      gp: 'GP de Mônaco',
-      city: 'Monte Carlo',
-      country: 'Mônaco',
-      flag: '🇲🇨',
-      image: '/images/circuit-monaco.webp',
-      description: 'A joia da coroa da F1, corrida nas ruas do principado mais famoso do mundo.',
-      length: '3.337 km',
-      laps: 78,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_de_Monaco'
-    },
-    {
-      name: 'Circuit Gilles Villeneuve',
-      gp: 'GP do Canadá',
-      city: 'Montreal',
-      country: 'Canadá',
-      flag: '🇨🇦',
-      image: '/images/circuit-canada.jpg',
-      description: 'Circuito urbano na Ilha de Notre-Dame, famoso pelo "Muro dos Campeões".',
-      length: '4.361 km',
-      laps: 70,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_Gilles_Villeneuve'
-    },
-    {
-      name: 'Circuit de Barcelona-Catalunya',
-      gp: 'GP da Espanha',
-      city: 'Barcelona',
-      country: 'Espanha',
-      flag: '🇪🇸',
-      image: '/images/circuit-barcelona.jpg',
-      description: 'Circuito técnico usado para testes de pré-temporada, com curvas de todos os tipos.',
-      length: '4.675 km',
-      laps: 66,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_de_Barcelona-Catalunya'
-    },
-    {
-      name: 'Red Bull Ring',
-      gp: 'GP da Áustria',
-      city: 'Spielberg',
-      country: 'Áustria',
-      flag: '🇦🇹',
-      image: '/images/circuit-redbullring.jpg',
-      description: 'Circuito curto e rápido nas montanhas da Estíria, com poucas curvas mas muita ação.',
-      length: '4.318 km',
-      laps: 71,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Red_Bull_Ring'
-    },
-    {
-      name: 'Silverstone Circuit',
-      gp: 'GP da Grã-Bretanha',
-      city: 'Silverstone',
-      country: 'Reino Unido',
-      flag: '🇬🇧',
-      image: '/images/circuit-silverstone.jpg',
-      description: 'O berço da Fórmula 1, palco da primeira corrida do Mundial em 1950.',
-      length: '5.891 km',
-      laps: 52,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Silverstone_Circuit'
-    },
-    {
-      name: 'Hungaroring',
-      gp: 'GP da Hungria',
-      city: 'Budapeste',
-      country: 'Hungria',
-      flag: '🇭🇺',
-      image: '/images/circuit-hungaroring.jpg',
-      description: 'Circuito semelhante a um kartódromo, com poucas oportunidades de ultrapassagem.',
-      length: '4.381 km',
-      laps: 70,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Hungaroring'
-    },
-    {
-      name: 'Circuit de Spa-Francorchamps',
-      gp: 'GP da Bélgica',
-      city: 'Spa',
-      country: 'Bélgica',
-      flag: '🇧🇪',
-      image: '/images/circuit-spa.jpg',
-      description: 'Um dos circuitos mais desafiadores do mundo, famoso pela curva Eau Rouge.',
-      length: '7.004 km',
-      laps: 44,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_de_Spa-Francorchamps'
-    },
-    {
-      name: 'Circuit Zandvoort',
-      gp: 'GP da Holanda',
-      city: 'Zandvoort',
-      country: 'Holanda',
-      flag: '🇳🇱',
-      image: '/images/circuit-zandvoort.jpg',
-      description: 'Circuito à beira-mar com inclinações únicas, palco da festa laranja de Verstappen.',
-      length: '4.259 km',
-      laps: 72,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_Zandvoort'
-    },
-    {
-      name: 'Autodromo Nazionale Monza',
-      gp: 'GP da Itália',
-      city: 'Monza',
-      country: 'Itália',
-      flag: '🇮🇹',
-      image: '/images/circuit-monza.jpg',
-      description: 'O Templo da Velocidade, casa da Ferrari e das retas mais rápidas da F1.',
-      length: '5.793 km',
-      laps: 53,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Autodromo_Nazionale_Monza'
-    },
-    {
-      name: 'Baku City Circuit',
-      gp: 'GP do Azerbaijão',
-      city: 'Baku',
-      country: 'Azerbaijão',
-      flag: '🇦🇿',
-      image: '/images/circuit-baku-new.jpg',
-      description: 'Circuito urbano no centro histórico, com a reta mais longa da F1.',
-      length: '6.003 km',
-      laps: 51,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Baku_City_Circuit'
-    },
-    {
-      name: 'Marina Bay Street Circuit',
-      gp: 'GP de Singapura',
-      city: 'Singapura',
-      country: 'Singapura',
-      flag: '🇸🇬',
-      image: '/images/circuit-singapore.jpg',
-      description: 'Primeira corrida noturna da F1, circuito urbano desafiador e úmido.',
-      length: '4.940 km',
-      laps: 62,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Marina_Bay_Street_Circuit'
-    },
-    {
-      name: 'Circuit of the Americas',
-      gp: 'GP dos EUA',
-      city: 'Austin',
-      country: 'EUA',
-      flag: '🇺🇸',
-      image: '/images/circuit-austin.jpg',
-      description: 'Circuito moderno inspirado em Silverstone, com uma das melhores arquibancadas da F1.',
-      length: '5.513 km',
-      laps: 56,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Circuit_of_the_Americas'
-    },
-    {
-      name: 'Autódromo Hermanos Rodríguez',
-      gp: 'GP do México',
-      city: 'Cidade do México',
-      country: 'México',
-      flag: '🇲🇽',
-      image: '/images/circuit-mexico.jpg',
-      description: 'Circuito a 2.200m de altitude, famoso pelo estádio de beisebol nas curvas finais.',
-      length: '4.304 km',
-      laps: 71,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Aut%C3%B3dromo_Hermanos_Rodr%C3%ADguez'
-    },
-    {
-      name: 'Interlagos',
-      gp: 'GP do Brasil',
-      city: 'São Paulo',
-      country: 'Brasil',
-      flag: '🇧🇷',
-      image: '/images/circuit-interlagos.jpg',
-      description: 'Autódromo José Carlos Pace, palco de momentos históricos como o tricampeonato de Senna.',
-      length: '4.309 km',
-      laps: 71,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Aut%C3%B3dromo_Jos%C3%A9_Carlos_Pace'
-    },
-    {
-      name: 'Las Vegas Strip Circuit',
-      gp: 'GP de Las Vegas',
-      city: 'Las Vegas',
-      country: 'EUA',
-      flag: '🇺🇸',
-      image: '/images/circuit-lasvegas.png',
-      description: 'Corrida noturna na Strip de Las Vegas, com o cassino Sphere como cenário.',
-      length: '6.201 km',
-      laps: 50,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Las_Vegas_Strip_Circuit'
-    },
-    {
-      name: 'Lusail International Circuit',
-      gp: 'GP do Catar',
-      city: 'Lusail',
-      country: 'Catar',
-      flag: '🇶🇦',
-      image: '/images/circuit-lusail.jpg',
-      description: 'Circuito moderno no deserto, palco da primeira corrida noturna do Oriente Médio.',
-      length: '5.419 km',
-      laps: 57,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Lusail_International_Circuit'
-    },
-    {
-      name: 'Yas Marina Circuit',
-      gp: 'GP de Abu Dhabi',
-      city: 'Abu Dhabi',
-      country: 'Emirados Árabes',
-      flag: '🇦🇪',
-      image: '/images/circuit-yasmarina.jpg',
-      description: 'Circuito desenhado por Hermann Tilke, palco da decisão do campeonato.',
-      length: '5.281 km',
-      laps: 58,
-      wikiUrl: 'https://en.wikipedia.org/wiki/Yas_Marina_Circuit'
-    }
-  ]
 
   const { t } = useApp()
 
@@ -1319,7 +1054,7 @@ function CircuitosSection() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {circuitos.map((circuito, index) => (
+            {CIRCUITOS_DATA.map((circuito, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedCircuito(circuito)}
@@ -2016,7 +1751,6 @@ function NoticiasSection() {
 
 // ==================== FOOTER ====================
 function Footer() {
-  const currentYear = new Date().getFullYear()
   const { t } = useApp()
   
   return (
@@ -2034,7 +1768,7 @@ function Footer() {
             <div className="flex flex-wrap justify-center gap-6">
               {[
                 { label: t('nav.home') as string, href: '#hero' },
-                { label: `${t('nav.rules')} ${currentYear}`, href: '#regras' },
+                { label: `${t('nav.rules')} ${CURRENT_YEAR}`, href: '#regras' },
                 { label: t('nav.teams') as string, href: '#equipes' },
                 { label: t('nav.calendar') as string, href: '#calendario' },
                 { label: t('nav.watch') as string, href: '#onde-assistir' },
@@ -2051,7 +1785,7 @@ function Footer() {
             </div>
 
             <div className="text-white/30 text-sm">
-              © {currentYear} F1Start
+              © {CURRENT_YEAR} F1Start
             </div>
           </div>
           
