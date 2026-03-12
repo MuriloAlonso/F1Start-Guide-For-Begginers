@@ -177,13 +177,15 @@ function Navigation() {
       }`}>
         <div className="section-padding">
           <div className="flex items-center justify-between h-20">
-            <a href="#hero" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-[#E10600] rounded-lg flex items-center justify-center transform group-hover:scale-105 transition-transform">
-                <Flag className="w-5 h-5 text-white" />
+            <a href="#hero" className="flex items-center group">
+              <div className="h-14 w-14 rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform ring-1 ring-white/10">
+                <img
+                  src="/images/f1start-logo.png"
+                  alt="F1Start"
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: 'center', filter: 'drop-shadow(0 0 8px rgba(225, 6, 0, 0.6))' }}
+                />
               </div>
-              <span className="font-f1 text-2xl font-semibold text-white">
-                F1<span className="text-[#E10600]">Start</span>
-              </span>
             </a>
 
             <div className="hidden xl:flex items-center gap-1">
@@ -1764,11 +1766,15 @@ function Footer() {
       <div className="section-padding py-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#E10600] rounded-lg flex items-center justify-center">
-                <Flag className="w-5 h-5 text-white" />
+            <div className="flex items-center">
+              <div className="h-14 w-14 rounded-xl overflow-hidden ring-1 ring-white/10">
+                <img
+                  src="/images/f1start-logo.png"
+                  alt="F1Start"
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: 'center', filter: 'drop-shadow(0 0 8px rgba(225, 6, 0, 0.5))' }}
+                />
               </div>
-              <span className="font-f1 text-2xl font-semibold text-white">F1<span className="text-[#E10600]">Start</span></span>
             </div>
             
             <div className="flex flex-wrap justify-center gap-6">
