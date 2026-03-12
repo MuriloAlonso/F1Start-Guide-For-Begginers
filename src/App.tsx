@@ -1264,10 +1264,10 @@ function SistemaAutomatizadoSection() {
       status: t('auto.active')
     },
     {
-      icon: <RefreshCw className="w-6 h-6" />,
+      icon: <TrendingUp className="w-6 h-6" />,
       title: t('auto.manual.title'),
       description: t('auto.manual.desc'),
-      status: t('auto.available')
+      status: t('auto.active')
     }
   ]
 
