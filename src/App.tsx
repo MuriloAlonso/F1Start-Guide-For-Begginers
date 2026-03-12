@@ -192,7 +192,7 @@ function Navigation() {
                 <a
                   key={item.href}
                   href={item.href}
-                  className="nav-item-link px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                  className="nav-item-link px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all whitespace-nowrap"
                 >
                   {item.label}
                 </a>
@@ -268,7 +268,7 @@ function StatCard({ value, label }: { value: string; label: string }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="font-mono-stat text-3xl sm:text-4xl font-bold text-[#E10600]">{display}</div>
+      <div className="font-mono-stat text-3xl sm:text-4xl font-bold text-white">{display}</div>
       <div className="text-sm text-white/40 mt-1 uppercase tracking-wider">{label}</div>
     </div>
   )
@@ -286,7 +286,9 @@ function HeroSection() {
           src="/images/f1-track.jpg" 
           alt="Formula 1 cars on track" 
           className="w-full h-full object-cover opacity-30"
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
         />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,_rgba(225,6,0,0.15),_transparent)]" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(225,6,0,0.2),_transparent_50%)]" />
         <div className="speed-lines" />
@@ -672,8 +674,10 @@ function EquipesSection() {
                     className={`f1-card p-5 text-left group relative overflow-hidden transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                     style={{ transitionDelay: `${index * 0.05}s` }}
                   >
-                    <div className="h-1 rounded-full mb-4" style={{ backgroundColor: team.color }} />
-                    <h3 className="font-f1 text-xl text-white mb-3 group-hover:text-[#E10600] transition-colors">{team.name}</h3>
+                    <span className="team-position-badge">#{team.position}</span>
+                    <div className="team-color-bar" style={{ backgroundColor: team.color }} />
+                    <h3 className="font-f1 text-xl text-white mb-0.5 group-hover:text-[#E10600] transition-colors">{team.name}</h3>
+                    <p className="text-white/30 text-xs mb-3 truncate">{team.fullName}</p>
                     <div className="space-y-1 mb-4">
                       {team.drivers.map((driver, i) => (
                         <p key={i} className="text-white/60 text-sm">{driver}</p>
@@ -929,21 +933,27 @@ function PontuacaoSection() {
           </div>
 
           <div className={`mt-8 glass rounded-2xl p-6 sm:p-8 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <h3 className="font-f1 text-lg sm:text-xl text-white mb-8 text-center">{t('points.championships.title')}</h3>
-            <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
-              <div className="text-center">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#E10600]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Trophy className="w-6 h-6 sm:w-8 sm:h-8 text-[#E10600]" />
+            <h3 className="font-f1 text-lg sm:text-xl text-white mb-6 text-center">{t('points.championships.title')}</h3>
+            <div className="flex flex-col gap-4">
+              <div className="championship-card">
+                <div className="w-12 h-12 bg-[#E10600]/15 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Trophy className="w-6 h-6 text-[#E10600]" />
                 </div>
-                <h4 className="text-white font-bold text-base sm:text-lg mb-2">{t('points.drivers.title')}</h4>
-                <p className="text-white/50 text-sm">{t('points.drivers.desc')}</p>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-white font-bold text-base mb-1">{t('points.drivers.title')}</h4>
+                  <p className="text-white/50 text-sm">{t('points.drivers.desc')}</p>
+                </div>
+                <span className="text-white/20 text-xs font-mono uppercase tracking-wider hidden sm:block">Piloto</span>
               </div>
-              <div className="text-center">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#E10600]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-6 h-6 sm:w-8 sm:h-8 text-[#E10600]" />
+              <div className="championship-card">
+                <div className="w-12 h-12 bg-[#E10600]/15 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Users className="w-6 h-6 text-[#E10600]" />
                 </div>
-                <h4 className="text-white font-bold text-base sm:text-lg mb-2">{t('points.constructors.title')}</h4>
-                <p className="text-white/50 text-sm">{t('points.constructors.desc')}</p>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-white font-bold text-base mb-1">{t('points.constructors.title')}</h4>
+                  <p className="text-white/50 text-sm">{t('points.constructors.desc')}</p>
+                </div>
+                <span className="text-white/20 text-xs font-mono uppercase tracking-wider hidden sm:block">Equipe</span>
               </div>
             </div>
           </div>
@@ -1810,8 +1820,9 @@ function Footer() {
   const { t } = useApp()
   
   return (
-    <footer className="bg-black border-t border-white/10">
-      <div className="section-padding py-16">
+    <footer className="bg-black">
+      <div className="footer-top-accent" />
+      <div className="section-padding py-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
             <div className="flex items-center gap-3">
@@ -1863,18 +1874,31 @@ function AppContent() {
       <Navigation />
       <main>
         <HeroSection />
+        <div className="section-divider" />
         <OQueESection />
+        <div className="section-divider" />
         <RegrasSection />
+        <div className="section-divider" />
         <EquipesSection />
+        <div className="section-divider" />
         <CalendarioSection />
+        <div className="section-divider" />
         <PontuacaoSection />
+        <div className="section-divider" />
         <OndeAssistirSection />
+        <div className="section-divider" />
         <CircuitosSection />
+        <div className="section-divider" />
         <GaleriaSection />
+        <div className="section-divider" />
         <SistemaAutomatizadoSection />
+        <div className="section-divider" />
         <LendasSection />
+        <div className="section-divider" />
         <PneusSection />
+        <div className="section-divider" />
         <ClimaSection />
+        <div className="section-divider" />
         <NoticiasSection />
       </main>
       <Footer />

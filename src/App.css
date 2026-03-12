@@ -173,6 +173,27 @@ html {
   letter-spacing: -0.02em;
 }
 
+/* ==================== SECTION DIVIDER ==================== */
+
+/* Linha gradiente vermelha entre seções */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(225, 6, 0, 0.4), transparent);
+  margin: 0;
+  border: none;
+}
+
+/* Acento laranja/cobre para detalhes pontuais */
+.text-copper {
+  color: #FF4D00;
+}
+.bg-copper {
+  background-color: #FF4D00;
+}
+.border-copper {
+  border-color: #FF4D00;
+}
+
 /* ==================== HEADER ==================== */
 
 /* Enhanced header on scroll */
@@ -253,6 +274,56 @@ html {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ==================== TEAM CARDS ==================== */
+
+/* Barra colorida de equipe no topo do card */
+.team-color-bar {
+  height: 3px;
+  border-radius: 9999px;
+  margin-bottom: 1rem;
+  transition: height 0.2s ease;
+}
+.f1-card:hover .team-color-bar {
+  height: 4px;
+}
+
+/* Badge de posição no canto do card de equipe */
+.team-position-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 0.05em;
+}
+
+/* ==================== CHAMPIONSHIP CARDS ==================== */
+
+.championship-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  border-left: 3px solid #E10600;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+.championship-card:hover {
+  background: rgba(225, 6, 0, 0.07);
+  transform: translateX(3px);
+}
+
+/* ==================== FOOTER ==================== */
+
+.footer-top-accent {
+  height: 2px;
+  background: linear-gradient(to right, transparent, #E10600 30%, #FF4D00 50%, #E10600 70%, transparent);
+}
+
+/* ==================== CUSTOM SCROLLBAR ==================== */
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
