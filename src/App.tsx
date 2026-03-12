@@ -1647,6 +1647,13 @@ function NoticiasSection() {
                 {t('news.refresh')}
               </Button>
             </div>
+          ) : !loading && news.length === 0 ? (
+            <div className="glass rounded-2xl p-12 text-center">
+              <p className="text-white/50 mb-4">{t('news.unavailable')}</p>
+              <Button onClick={refresh} variant="outline" className="border-white/20 text-white hover:bg-white/5 rounded-xl">
+                {t('news.refresh')}
+              </Button>
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedNews.map((article, index) => (

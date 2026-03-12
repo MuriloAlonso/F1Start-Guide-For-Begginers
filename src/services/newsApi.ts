@@ -27,72 +27,6 @@ interface CacheData {
 // Guard para evitar fetches concorrentes
 let isFetching = false;
 
-// Notícias fallback em caso de falha nas APIs
-const FALLBACK_NEWS_PT: NewsItem[] = [
-  {
-    id: '1',
-    title: 'Charles Leclerc lidera testes no Bahrein',
-    summary: 'Ferrari mostra força no primeiro dia de testes de pré-temporada no Bahrein, com Leclerc no topo da tabela de tempos.',
-    date: new Date().toISOString(),
-    tag: 'Testes',
-    important: true,
-    source: 'Formula1.com',
-    url: 'https://www.formula1.com'
-  },
-  {
-    id: '2',
-    title: 'Red Bull e Mercedes enfrentam problemas técnicos',
-    summary: 'Isack Hadjar e Kimi Antonelli tiveram poucas voltas no primeiro dia devido a problemas hidráulicos e no power unit.',
-    date: new Date(Date.now() - 3600000).toISOString(),
-    tag: 'Problemas',
-    important: true,
-    source: 'Sky Sports F1',
-    url: 'https://www.skysports.com/f1'
-  },
-  {
-    id: '3',
-    title: 'Lewis Hamilton troca de engenheiro de corrida',
-    summary: 'Hamilton admitiu que a mudança de engenheiro pode ser "prejudicial" no início da temporada com a Ferrari.',
-    date: new Date(Date.now() - 7200000).toISOString(),
-    tag: 'Ferrari',
-    important: false,
-    source: 'BBC Sport',
-    url: 'https://www.bbc.com/sport/formula1'
-  }
-];
-
-const FALLBACK_NEWS_EN: NewsItem[] = [
-  {
-    id: '1',
-    title: 'Charles Leclerc leads Bahrain testing',
-    summary: 'Ferrari shows strength on the first day of pre-season testing in Bahrain, with Leclerc at the top of the timesheets.',
-    date: new Date().toISOString(),
-    tag: 'Testing',
-    important: true,
-    source: 'Formula1.com',
-    url: 'https://www.formula1.com'
-  },
-  {
-    id: '2',
-    title: 'Red Bull and Mercedes face technical issues',
-    summary: 'Isack Hadjar and Kimi Antonelli had few laps on the first day due to hydraulic and power unit problems.',
-    date: new Date(Date.now() - 3600000).toISOString(),
-    tag: 'Issues',
-    important: true,
-    source: 'Sky Sports F1',
-    url: 'https://www.skysports.com/f1'
-  },
-  {
-    id: '3',
-    title: 'Lewis Hamilton changes race engineer',
-    summary: 'Hamilton admitted that the engineer change may be "detrimental" at the start of the season with Ferrari.',
-    date: new Date(Date.now() - 7200000).toISOString(),
-    tag: 'Ferrari',
-    important: false,
-    source: 'BBC Sport',
-    url: 'https://www.bbc.com/sport/formula1'
-  }
-];
 
 // Função para gerar ID único
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -250,7 +184,7 @@ export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsIte
       const cacheData: CacheData = JSON.parse(cached);
       return cacheData.news;
     }
-    return language === 'en' ? FALLBACK_NEWS_EN : FALLBACK_NEWS_PT;
+    return [];
   }
 
   try {
@@ -318,8 +252,7 @@ export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsIte
       return cacheData.news;
     }
 
-    // Último recurso: notícias estáticas de fallback
-    return language === 'en' ? FALLBACK_NEWS_EN : FALLBACK_NEWS_PT;
+    return [];
   } finally {
     isFetching = false;
   }
