@@ -55,13 +55,13 @@ export const useAutoUpdate = (options: UseAutoUpdateOptions = {}): UseAutoUpdate
 
   // Função para verificar atualizações
   const checkUpdates = useCallback(async () => {
-    const shouldUpdate = await checkForUpdates();
+    const shouldUpdate = await checkForUpdates(language);
     if (shouldUpdate) {
       setHasUpdate(true);
       // Auto-atualiza se passou tempo suficiente
       await fetchNews(true);
     }
-  }, [fetchNews]);
+  }, [fetchNews, language]);
 
   // Função de refresh manual
   const refresh = useCallback(async () => {

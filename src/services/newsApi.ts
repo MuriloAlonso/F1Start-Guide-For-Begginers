@@ -16,6 +16,9 @@ export interface NewsItem {
 const CACHE_KEY = 'f1_news_cache_v2';
 const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 
+// Chave de cache separada por idioma
+const getCacheKey = (language: 'pt' | 'en') => `${CACHE_KEY}_${language}`;
+
 interface CacheData {
   news: NewsItem[];
   timestamp: number;
@@ -340,6 +343,38 @@ const fetchWithTimeout = (url: string, ms: number): Promise<Response> => {
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
 };
 
+// Tradução via Google Translate API (gratuito, sem chave)
+const SEP = '|||SEP|||';
+const TRANSLATE_URL = 'https://translate.googleapis.com/translate_a/single';
+
+const translateText = async (text: string, targetLang: string): Promise<string> => {
+  const url = `${TRANSLATE_URL}?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+  const response = await fetchWithTimeout(url, 8000);
+  if (!response.ok) throw new Error(`Translate HTTP ${response.status}`);
+  const data = await response.json();
+  return (data[0] as string[][]).map(chunk => chunk[0]).join('');
+};
+
+const translateNewsItems = async (items: NewsItem[]): Promise<NewsItem[]> => {
+  const results = await Promise.allSettled(
+    items.map(async (item) => {
+      try {
+        const combined = `${item.title}${SEP}${item.summary}`;
+        const translated = await translateText(combined, 'pt-BR');
+        const parts = translated.split(SEP);
+        return {
+          ...item,
+          title: parts[0]?.trim() || item.title,
+          summary: parts[1]?.trim() || item.summary,
+        };
+      } catch {
+        return item;
+      }
+    })
+  );
+  return results.map((r, i) => r.status === 'fulfilled' ? r.value : items[i]);
+};
+
 const fetchFeedItems = async (feedUrl: string, source: string): Promise<NewsItem[]> => {
   const proxyUrl = `${CORS_PROXY}${encodeURIComponent(feedUrl)}`;
   const response = await fetchWithTimeout(proxyUrl, 12000);
@@ -375,9 +410,11 @@ const fetchFeedItems = async (feedUrl: string, source: string): Promise<NewsItem
 
 // Função principal para buscar notícias
 export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsItem[]> => {
+  const cacheKey = getCacheKey(language);
+
   try {
-    // Verifica cache primeiro
-    const cached = localStorage.getItem(CACHE_KEY);
+    // Verifica cache do idioma atual primeiro
+    const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const cacheData: CacheData = JSON.parse(cached);
       const age = Date.now() - cacheData.timestamp;
@@ -388,7 +425,7 @@ export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsIte
       }
     }
 
-    // Tenta buscar de RSS feeds reais
+    // Tenta buscar de RSS feeds reais (sempre em inglês)
     const results = await Promise.allSettled(
       RSS_FEEDS.map(feed => fetchFeedItems(feed.url, feed.source))
     );
@@ -415,20 +452,23 @@ export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsIte
         return true;
       });
 
+    // Traduz para PT-BR se necessário (feeds são sempre em inglês)
+    const finalNews = language === 'pt' ? await translateNewsItems(deduped) : deduped;
+
     const cacheData: CacheData = {
-      news: deduped,
+      news: finalNews,
       timestamp: Date.now()
     };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+    localStorage.setItem(cacheKey, JSON.stringify(cacheData));
 
-    console.log(`Notícias atualizadas: ${deduped.length} artigos de ${RSS_FEEDS.length} fontes`);
-    return deduped;
+    console.log(`Notícias atualizadas: ${finalNews.length} artigos (${language.toUpperCase()})`);
+    return finalNews;
 
   } catch (error) {
     console.error('Erro ao buscar notícias dos feeds:', error instanceof Error ? error.message : String(error));
 
     // Em caso de erro, tenta usar cache antigo (mesmo expirado)
-    const cached = localStorage.getItem(CACHE_KEY);
+    const cached = localStorage.getItem(cacheKey);
     if (cached) {
       const cacheData: CacheData = JSON.parse(cached);
       console.log('Usando cache expirado como fallback');
@@ -442,13 +482,13 @@ export const fetchF1News = async (language: 'pt' | 'en' = 'pt'): Promise<NewsIte
 
 // Função para forçar atualização
 export const forceNewsUpdate = async (language: 'pt' | 'en' = 'pt'): Promise<NewsItem[]> => {
-  localStorage.removeItem(CACHE_KEY);
+  localStorage.removeItem(getCacheKey(language));
   return fetchF1News(language);
 };
 
 // Função para verificar se há novas notícias
-export const checkForUpdates = async (): Promise<boolean> => {
-  const cached = localStorage.getItem(CACHE_KEY);
+export const checkForUpdates = async (language: 'pt' | 'en' = 'pt'): Promise<boolean> => {
+  const cached = localStorage.getItem(getCacheKey(language));
   if (!cached) return true;
   
   const cacheData: CacheData = JSON.parse(cached);

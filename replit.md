@@ -25,9 +25,11 @@ src/
 ## News System
 - Real RSS feeds fetched via `api.allorigins.win` CORS proxy
 - Sources: BBC Sport F1, Motorsport.com, RaceFans
-- Cache duration: 15 minutes (localStorage key: `f1_news_cache_v2`)
+- Cache duration: 15 minutes, **separate per language** (`f1_news_cache_v2_pt` / `f1_news_cache_v2_en`)
+- Feeds are always fetched in English; when PT-BR is active, articles are auto-translated via Google Translate API (free, no key required)
+- Translation happens per article in parallel (title + summary batched into one request per article)
+- Switching language triggers a fresh fetch + translate cycle for the new language
 - Fallback: static hardcoded news if all feeds fail
-- Only `src/services/newsApi.ts` was modified — all exports, interfaces, and hook signatures remain unchanged
 
 ## Development
 - Run: `npm run dev` (starts on port 5000)
