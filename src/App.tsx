@@ -180,7 +180,7 @@ function Navigation() {
         <div className="section-padding">
           <div className="flex items-center justify-between h-20">
             <a href="#hero" className="flex items-center group">
-              <div className="h-14 w-14 rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform ring-1 ring-white/10">
+              <div className="h-20 w-20 rounded-xl overflow-hidden transform group-hover:scale-105 transition-transform">
                 <img
                   src={theme === 'dark' ? '/images/f1start-logo-dark.png' : '/images/f1start-logo-light.png'}
                   alt="F1Start"
@@ -1783,7 +1783,7 @@ function Footer() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
             <div className="flex items-center">
-              <div className="h-14 w-14 rounded-xl overflow-hidden ring-1 ring-white/10">
+              <div className="h-20 w-20 rounded-xl overflow-hidden">
                 <img
                   src={theme === 'dark' ? '/images/f1start-logo-dark.png' : '/images/f1start-logo-light.png'}
                   alt="F1Start"
