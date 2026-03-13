@@ -298,6 +298,8 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.follow': 'Siga a F1',
     'footer.copyright': 'Todos os direitos reservados.',
     'footer.disclaimer': 'F1 Start não é afiliado à Formula 1. F1 é marca registrada da Formula One Licensing B.V.',
+    'footer.academic': 'Este site é um projeto acadêmico desenvolvido para fins de estudo. Todo o código-fonte está disponível gratuitamente para consulta e aprendizado.',
+    'footer.github': 'Acesse o código no GitHub',
 
     // Idiomas
     'lang.pt': 'Português',
@@ -590,6 +592,8 @@ const translations: Record<Language, Record<string, string>> = {
     'footer.follow': 'Follow F1',
     'footer.copyright': 'All rights reserved.',
     'footer.disclaimer': 'F1 Start is not affiliated with Formula 1. F1 is a registered trademark of Formula One Licensing B.V.',
+    'footer.academic': 'This website is an academic project developed for study purposes. All source code is freely available for reference and learning.',
+    'footer.github': 'View the code on GitHub',
 
     // Idiomas
     'lang.pt': 'Português',
