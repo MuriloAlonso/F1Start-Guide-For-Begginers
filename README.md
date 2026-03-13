@@ -112,3 +112,121 @@ Este projeto é livre para uso acadêmico e educacional. Sinta-se à vontade par
 ---
 
 *Desenvolvido com React + TypeScript + Vite*
+
+---
+---
+
+# F1Start — Formula 1 Guide for Beginners
+
+> Academic project developed for university. Freely available for study and learning.
+
+An interactive, bilingual (PT-BR / EN) website that introduces Formula 1 in a simple and educational way for those just starting to follow the sport.
+
+**View the project:** [github.com/MuriloAlonso/F1Start-Guide-For-Begginers](https://github.com/MuriloAlonso/F1Start-Guide-For-Begginers)
+
+---
+
+## About the Project
+
+**F1Start** is a complete guide for beginner Formula 1 fans. The site covers everything from the basics of the sport to real-time information such as news, the season calendar, and team data.
+
+Created as a university project, the code is open and can be freely downloaded, studied, and modified by anyone.
+
+---
+
+## Features
+
+- **Real-time news** — RSS feeds from BBC Sport F1, Motorsport.com, and RaceFans, with automatic translation to PT-BR
+- **Season calendar** — all 2026 races
+- **Teams and drivers** — information on all constructors for the season
+- **Points system** — complete explanation of the scoring rules
+- **Circuits** — all championship circuits
+- **Weather and strategy** — how weather affects races and tire strategies
+- **Where to watch** — available broadcast platforms
+- **Bilingual** — Portuguese (PT-BR) and English (EN) with instant switching
+
+---
+
+## Tech Stack
+
+| Technology | Use |
+|---|---|
+| React 19 + TypeScript | Main framework |
+| Vite 7 | Build tool and dev server |
+| Tailwind CSS | Styling |
+| Radix UI / shadcn/ui | UI components |
+| Lucide React | Icons |
+| Recharts | Charts |
+| React Hook Form + Zod | Forms and validation |
+
+---
+
+## Running Locally
+
+### Prerequisites
+- Node.js 18 or higher
+- npm
+
+### Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/MuriloAlonso/F1Start-Guide-For-Begginers.git
+
+# 2. Enter the project folder
+cd F1Start-Guide-For-Begginers
+
+# 3. Install dependencies
+npm install
+
+# 4. Start the development server
+npm run dev
+```
+
+The site will be available at `http://localhost:5000`.
+
+### Other commands
+
+```bash
+npm run build    # Generates the production build in the /dist folder
+npm run preview  # Preview the production build locally
+npm run lint     # Check for code errors
+```
+
+---
+
+## Deployment
+
+The project is configured for deployment on **Vercel**:
+
+- Includes `vercel.json` with SPA routing configured
+- Includes a serverless function at `api/proxy.js` for fetching RSS feeds without CORS issues
+- Build command: `npm run build`
+- Output directory: `dist`
+
+---
+
+## Project Structure
+
+```
+src/
+├── App.tsx              # Main component (all page sections)
+├── components/          # Reusable components (LanguageSelector, etc.)
+├── contexts/            # Global context (language, translations)
+├── hooks/               # Custom hooks (useAutoUpdate, etc.)
+├── services/            # Data services (newsApi, f1DataService)
+└── lib/                 # Utilities
+
+api/
+└── proxy.js             # Serverless proxy for RSS feeds (Vercel)
+```
+
+---
+
+## License
+
+This project is free for academic and educational use. Feel free to clone, study, and adapt the code.
+
+---
+
+*Built with React + TypeScript + Vite*
