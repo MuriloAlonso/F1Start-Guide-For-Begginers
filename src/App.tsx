@@ -35,7 +35,6 @@ import {
   Play,
   Tv,
   Globe,
-  Bell,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -1220,90 +1219,6 @@ function CircuitosSection() {
   )
 }
 
-// ==================== SISTEMA AUTOMATIZADO ====================
-function SistemaAutomatizadoSection() {
-  const { ref, isVisible } = useScrollAnimation()
-  const { t } = useApp()
-
-  const automatizacoes = [
-    {
-      icon: <Radio className="w-6 h-6" />,
-      title: t('auto.realtime.title'),
-      description: t('auto.realtime.desc'),
-      status: t('auto.active')
-    },
-    {
-      icon: <Calendar className="w-6 h-6" />,
-      title: t('auto.year.title'),
-      description: t('auto.year.desc'),
-      status: t('auto.active')
-    },
-    {
-      icon: <Globe className="w-6 h-6" />,
-      title: t('auto.links.title'),
-      description: t('auto.links.desc'),
-      status: t('auto.active')
-    },
-    {
-      icon: <Bell className="w-6 h-6" />,
-      title: t('auto.cache.title'),
-      description: t('auto.cache.desc'),
-      status: t('auto.active')
-    },
-    {
-      icon: <TrendingUp className="w-6 h-6" />,
-      title: t('auto.manual.title'),
-      description: t('auto.manual.desc'),
-      status: t('auto.active')
-    }
-  ]
-
-  return (
-    <section id="automatizado" ref={ref} className="py-32 bg-black relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#E10600]/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#E10600]/5 rounded-full blur-3xl" />
-
-      <div className="section-padding relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <Badge className="mb-4 bg-[#E10600]/20 text-[#E10600] border-[#E10600]/30 rounded-full">
-              <Zap className="w-3.5 h-3.5 mr-1.5" />
-              {t('auto.badge')}
-            </Badge>
-            <h2 className="font-f1 text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-4">
-              {t('auto.title')} <span className="text-[#E10600]">{t('auto.automated')}</span>?
-            </h2>
-            <p className="text-white/50 text-lg max-w-2xl mx-auto">
-              {t('auto.subtitle')}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {automatizacoes.map((item, index) => (
-              <div 
-                key={index}
-                className={`f1-card p-6 group transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ transitionDelay: `${index * 0.1}s` }}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-[#E10600]/20 rounded-xl flex items-center justify-center text-[#E10600]">
-                    {item.icon}
-                  </div>
-                  <Badge className={item.status === t('auto.active') ? 'bg-green-500/20 text-green-400 border-green-500/30 rounded-full' : 'bg-blue-500/20 text-blue-400 border-blue-500/30 rounded-full'}>
-                    {item.status}
-                  </Badge>
-                </div>
-                <h3 className="font-f1 text-xl text-white mb-3">{item.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 // ==================== LENDAS ====================
 function LendasSection() {
   const { ref, isVisible } = useScrollAnimation()
@@ -1853,8 +1768,6 @@ function AppContent() {
         <OndeAssistirSection />
         <div className="section-divider" />
         <CircuitosSection />
-        <div className="section-divider" />
-        <SistemaAutomatizadoSection />
         <div className="section-divider" />
         <LendasSection />
         <div className="section-divider" />
