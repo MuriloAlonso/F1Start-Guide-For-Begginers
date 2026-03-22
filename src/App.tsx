@@ -76,6 +76,20 @@ const DRIVER_LINKS: Record<string, string> = {
   'Sergio Perez': 'https://en.wikipedia.org/wiki/Sergio_P%C3%A9rez',
 }
 
+const TEAM_CARS: Record<string, string> = {
+  'McLaren': '/images/cars/mclaren.jpg',
+  'Ferrari': '/images/cars/ferrari.jpg',
+  'Red Bull Racing': '/images/cars/redbull.jpg',
+  'Mercedes': '/images/cars/mercedes.jpg',
+  'Aston Martin': '/images/cars/astonmartin.jpg',
+  'Alpine': '/images/cars/alpine.jpg',
+  'Williams': '/images/cars/williams.jpg',
+  'Haas': '/images/cars/haas.jpg',
+  'Racing Bulls': '/images/cars/racingbulls.jpg',
+  'Audi': '/images/cars/audi.jpg',
+  'Cadillac': '/images/cars/cadillac.jpg',
+}
+
 const TEAM_LOGOS: Record<string, string> = {
   'McLaren': '/images/teams/mclaren.jpg',
   'Ferrari': '/images/teams/ferrari.png',
@@ -409,6 +423,19 @@ function OQueESection() {
             </p>
           </div>
 
+          <div className={`mb-12 rounded-2xl overflow-hidden relative h-56 sm:h-72 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <img
+              src="/images/cars/redbull.jpg"
+              alt="Fórmula 1 car"
+              className="w-full h-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+            <div className="absolute bottom-4 left-6">
+              <p className="text-white/60 text-xs uppercase tracking-widest">Fórmula 1</p>
+              <p className="text-white font-bold text-lg">{t('whatis.car.caption')}</p>
+            </div>
+          </div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {conceitos.map((item, index) => (
               <div 
@@ -500,11 +527,22 @@ function RegrasSection() {
             </TabsList>
 
             <TabsContent value="carro" className="mt-0">
-              <div className={`glass rounded-2xl p-8 lg:p-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-                <h3 className="font-f1 text-3xl text-white mb-8 flex items-center gap-3">
-                  <Car className="w-8 h-8 text-[#E10600]" />
-                  {t('rules.car.title')}
-                </h3>
+              <div className={`glass rounded-2xl overflow-hidden transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                <div className="relative h-52 sm:h-64">
+                  <img
+                    src="/images/cars/ferrari.jpg"
+                    alt="F1 car"
+                    className="w-full h-full object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+                  <div className="absolute inset-0 flex items-center px-8 lg:px-12">
+                    <h3 className="font-f1 text-3xl text-white flex items-center gap-3">
+                      <Car className="w-8 h-8 text-[#E10600]" />
+                      {t('rules.car.title')}
+                    </h3>
+                  </div>
+                </div>
+                <div className="p-8 lg:p-12">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-4">
                     {[
@@ -530,6 +568,7 @@ function RegrasSection() {
                       <p className="text-white/50 text-sm">{t('rules.car.drag.desc')}</p>
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
             </TabsContent>
@@ -683,6 +722,15 @@ function EquipesSection() {
                     style={{ transitionDelay: `${index * 0.05}s` }}
                   >
                     <div className="team-color-bar" style={{ backgroundColor: team.color }} />
+                    {TEAM_CARS[team.name] && (
+                      <div className="h-28 overflow-hidden bg-[#111] -mx-5 -mt-0 mb-4">
+                        <img
+                          src={TEAM_CARS[team.name]}
+                          alt={`${team.name} car`}
+                          className="w-full h-full object-cover object-center"
+                        />
+                      </div>
+                    )}
                     <div className="flex items-center gap-3 mb-3">
                       {TEAM_LOGOS[team.name] && (
                         <div className="w-12 h-12 bg-white rounded-lg p-1.5 flex-shrink-0 flex items-center justify-center shadow">

@@ -55,6 +55,14 @@ api/
 - `npm run build` — build de produção
 - Host: `0.0.0.0`, `allowedHosts: true`
 
+## Assets / Imagens
+- `public/images/legends/` — Fotos dos pilotos lendários (Schumacher, Senna, Hamilton, Verstappen, Prost, Vettel)
+- `public/images/teams/` — Logos das 11 equipes (McLaren, Ferrari, Red Bull, Mercedes, Aston Martin, Alpine, Williams, Racing Bulls, Haas, Audi, Cadillac)
+- `public/images/cars/` — Fotos dos carros 2024 das 11 equipes (em ação, da Wikipedia); usadas em 3 locais:
+  - Seção "O que é F1": banner com foto do Red Bull RB20
+  - Cards Equipes: banner fotográfico no topo de cada card
+  - Aba "Carro" (Regras): header fotográfico do Ferrari SF-24
+
 ## Dependências de Segurança (overrides)
 - `minimatch`: 3.1.4 (3.x) e 9.0.7 (9.x)
 - `rollup`: 4.59.0
