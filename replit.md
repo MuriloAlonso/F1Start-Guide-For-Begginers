@@ -58,10 +58,12 @@ api/
 ## Assets / Imagens
 - `public/images/legends/` — Fotos dos pilotos lendários (Schumacher, Senna, Hamilton, Verstappen, Prost, Vettel)
 - `public/images/teams/` — Logos das 11 equipes (McLaren, Ferrari, Red Bull, Mercedes, Aston Martin, Alpine, Williams, Racing Bulls, Haas, Audi, Cadillac)
-- `public/images/cars/` — Fotos dos carros 2024 das 11 equipes (em ação, da Wikipedia); usadas em 3 locais:
-  - Seção "O que é F1": banner com foto do Red Bull RB20
-  - Cards Equipes: banner fotográfico no topo de cada card
-  - Aba "Carro" (Regras): header fotográfico do Ferrari SF-24
+- `public/images/cars/` — Fotos dos carros 2025/2026 das 11 equipes (em ação, da Wikimedia Commons); usadas em 3 locais:
+  - Seção "O que é F1": banner com foto do Red Bull RB22 (2026)
+  - Cards Equipes: banner fotográfico no topo de cada card com o carro real de cada equipe
+  - Aba "Carro" (Regras): header fotográfico do Ferrari 2026 (Hamilton)
+  - 2026: McLaren, Ferrari, Red Bull, Mercedes, Williams, Audi, Cadillac (MAC-26)
+  - 2025: Aston Martin, Alpine, Haas, Racing Bulls (best available via Wikimedia)
 
 ## Dependências de Segurança (overrides)
 - `minimatch`: 3.1.4 (3.x) e 9.0.7 (9.x)
