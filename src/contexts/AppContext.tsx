@@ -270,6 +270,10 @@ const translations: Record<Language, Record<string, string>> = {
     'weather.flag.red.desc': 'Corrida interrompida, parar nos boxes',
     'weather.flag.checkered': 'Xadrez',
     'weather.flag.checkered.desc': 'Fim da corrida!',
+    'weather.flag.blue': 'Azul',
+    'weather.flag.blue.desc': 'Um carro mais rápido se aproxima — deixe passar',
+    'weather.flag.redyellow': 'Listrada',
+    'weather.flag.redyellow.desc': 'Pista escorregadia à frente, tome cuidado',
     'weather.strategy': 'Estratégia',
 
     // Notícias
@@ -564,6 +568,10 @@ const translations: Record<Language, Record<string, string>> = {
     'weather.flag.red.desc': 'Race stopped, go to pits',
     'weather.flag.checkered': 'Checkered',
     'weather.flag.checkered.desc': 'End of race!',
+    'weather.flag.blue': 'Blue',
+    'weather.flag.blue.desc': 'A faster car is approaching — let them pass',
+    'weather.flag.redyellow': 'Striped',
+    'weather.flag.redyellow.desc': 'Slippery surface ahead, take care',
     'weather.strategy': 'Strategy',
 
     // Notícias

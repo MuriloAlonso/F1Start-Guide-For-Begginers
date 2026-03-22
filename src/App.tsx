@@ -76,6 +76,19 @@ const DRIVER_LINKS: Record<string, string> = {
   'Sergio Perez': 'https://en.wikipedia.org/wiki/Sergio_P%C3%A9rez',
 }
 
+const TEAM_LOGOS: Record<string, string> = {
+  'McLaren': '/images/teams/mclaren.jpg',
+  'Ferrari': '/images/teams/ferrari.png',
+  'Red Bull Racing': '/images/teams/redbull.png',
+  'Mercedes': '/images/teams/mercedes.png',
+  'Aston Martin': '/images/teams/astonmartin.png',
+  'Alpine': '/images/teams/alpine.png',
+  'Williams': '/images/teams/williams.png',
+  'Haas': '/images/teams/haas.png',
+  'RB': '/images/teams/rb.png',
+  'Sauber': '/images/teams/sauber.jpg',
+}
+
 const CIRCUITOS_DATA = [
   { name: 'Albert Park Circuit', gp: 'GP da Austrália', city: 'Melbourne', country: 'Austrália', flag: '🇦🇺', image: '/images/circuit-albert-park.jpg', description: 'Circuito urbano ao redor do Lago Albert Park, conhecido por suas curvas rápidas e belo cenário.', length: '5.278 km', laps: 58, wikiUrl: 'https://en.wikipedia.org/wiki/Melbourne_Grand_Prix_Circuit' },
   { name: 'Shanghai International Circuit', gp: 'GP da China', city: 'Shanghai', country: 'China', flag: '🇨🇳', image: '/images/circuit-shanghai.png', description: 'Circuito moderno com uma das retas mais longas da F1, desenhado por Hermann Tilke.', length: '5.451 km', laps: 56, wikiUrl: 'https://en.wikipedia.org/wiki/Shanghai_International_Circuit' },
@@ -669,8 +682,21 @@ function EquipesSection() {
                     style={{ transitionDelay: `${index * 0.05}s` }}
                   >
                     <div className="team-color-bar" style={{ backgroundColor: team.color }} />
-                    <h3 className="font-f1 text-xl text-white mb-0.5 group-hover:text-[#E10600] transition-colors">{team.name}</h3>
-                    <p className="text-white/30 text-xs mb-3 truncate">{team.fullName}</p>
+                    <div className="flex items-center gap-3 mb-3">
+                      {TEAM_LOGOS[team.name] && (
+                        <div className="w-12 h-12 bg-white rounded-lg p-1.5 flex-shrink-0 flex items-center justify-center shadow">
+                          <img
+                            src={TEAM_LOGOS[team.name]}
+                            alt={team.name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <h3 className="font-f1 text-lg text-white mb-0 group-hover:text-[#E10600] transition-colors leading-tight">{team.name}</h3>
+                        <p className="text-white/30 text-xs truncate">{team.fullName}</p>
+                      </div>
+                    </div>
                     <div className="space-y-1 mb-4">
                       {team.drivers.map((driver, i) => (
                         <p key={i} className="text-white/60 text-sm">{driver}</p>
@@ -1410,6 +1436,8 @@ function ClimaSection() {
     { type: 'green', name: t('weather.flag.green'), desc: t('weather.flag.green.desc') },
     { type: 'yellow', name: t('weather.flag.yellow'), desc: t('weather.flag.yellow.desc') },
     { type: 'red', name: t('weather.flag.red'), desc: t('weather.flag.red.desc') },
+    { type: 'blue', name: t('weather.flag.blue'), desc: t('weather.flag.blue.desc') },
+    { type: 'redyellow', name: t('weather.flag.redyellow'), desc: t('weather.flag.redyellow.desc') },
     { type: 'checkered', name: t('weather.flag.checkered'), desc: t('weather.flag.checkered.desc') },
   ]
 
@@ -1451,21 +1479,25 @@ function ClimaSection() {
 
           <div className={`glass rounded-2xl p-8 transition-all duration-700 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <h3 className="font-f1 text-2xl text-white mb-8 text-center">{t('weather.flags.title')}</h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {bandeiras.map((bandeira, index) => (
-                <div key={index} className="flex items-center gap-4">
+                <div key={index} className="flex items-center gap-4 bg-white/5 rounded-xl p-4">
                   {bandeira.type === 'checkered' ? (
-                    <div className="w-12 h-12 checkered-flag rounded-lg flex-shrink-0 shadow-lg border border-white/20" />
+                    <div className="w-16 h-16 checkered-flag rounded-lg flex-shrink-0 shadow-lg border border-white/20" />
+                  ) : bandeira.type === 'redyellow' ? (
+                    <div className="w-16 h-16 rounded-lg flex-shrink-0 shadow-lg overflow-hidden"
+                      style={{ background: 'repeating-linear-gradient(45deg, #E10600 0px, #E10600 8px, #f59e0b 8px, #f59e0b 16px)' }} />
                   ) : (
-                    <div className={`w-12 h-12 ${
-                      bandeira.type === 'green' ? 'bg-green-500' : 
-                      bandeira.type === 'yellow' ? 'bg-yellow-400' : 
-                      'bg-red-500'
-                    } rounded-lg flex-shrink-0 shadow-lg`} />
+                    <div className={`w-16 h-16 rounded-lg flex-shrink-0 shadow-lg ${
+                      bandeira.type === 'green' ? 'bg-green-500' :
+                      bandeira.type === 'yellow' ? 'bg-yellow-400' :
+                      bandeira.type === 'blue' ? 'bg-blue-500' :
+                      'bg-red-600'
+                    }`} />
                   )}
                   <div>
-                    <div className="text-white font-semibold">{bandeira.name}</div>
-                    <div className="text-white/50 text-sm">{bandeira.desc}</div>
+                    <div className="text-white font-semibold text-sm">{bandeira.name}</div>
+                    <div className="text-white/50 text-xs mt-0.5">{bandeira.desc}</div>
                   </div>
                 </div>
               ))}
