@@ -1310,12 +1310,12 @@ function LendasSection() {
   const { t } = useApp()
 
   const lendas = [
-    { name: 'Michael Schumacher', titles: '7 ' + t('legends.titles'), years: '1991-2012', periodLabel: t('legends.period'), desc: t('legends.schumacher.desc'), color: 'from-red-600 to-red-800', wikiUrl: 'https://en.wikipedia.org/wiki/Michael_Schumacher' },
-    { name: 'Ayrton Senna', titles: '3 ' + t('legends.titles'), years: '1984-1994', periodLabel: t('legends.period'), desc: t('legends.senna.desc'), color: 'from-green-600 to-green-800', wikiUrl: 'https://en.wikipedia.org/wiki/Ayrton_Senna' },
-    { name: 'Lewis Hamilton', titles: '7 ' + t('legends.titles'), years: '2007-' + new Date().getFullYear(), periodLabel: t('legends.period'), desc: t('legends.hamilton.desc'), color: 'from-purple-600 to-purple-800', wikiUrl: 'https://en.wikipedia.org/wiki/Lewis_Hamilton' },
-    { name: 'Max Verstappen', titles: '4 ' + t('legends.titles'), years: '2015-' + new Date().getFullYear(), periodLabel: t('legends.period'), desc: t('legends.verstappen.desc'), color: 'from-blue-600 to-blue-800', wikiUrl: 'https://en.wikipedia.org/wiki/Max_Verstappen' },
-    { name: 'Alain Prost', titles: '4 ' + t('legends.titles'), years: '1980-1993', periodLabel: t('legends.period'), desc: t('legends.prost.desc'), color: 'from-yellow-600 to-yellow-800', wikiUrl: 'https://en.wikipedia.org/wiki/Alain_Prost' },
-    { name: 'Sebastian Vettel', titles: '4 ' + t('legends.titles'), years: '2007-2022', periodLabel: t('legends.period'), desc: t('legends.vettel.desc'), color: 'from-cyan-600 to-cyan-800', wikiUrl: 'https://en.wikipedia.org/wiki/Sebastian_Vettel' },
+    { name: 'Michael Schumacher', titles: '7 ' + t('legends.titles'), years: '1991-2012', periodLabel: t('legends.period'), desc: t('legends.schumacher.desc'), color: 'from-red-600 to-red-800', wikiUrl: 'https://en.wikipedia.org/wiki/Michael_Schumacher', photo: '/images/legends/schumacher.png' },
+    { name: 'Ayrton Senna', titles: '3 ' + t('legends.titles'), years: '1984-1994', periodLabel: t('legends.period'), desc: t('legends.senna.desc'), color: 'from-green-600 to-green-800', wikiUrl: 'https://en.wikipedia.org/wiki/Ayrton_Senna', photo: '/images/legends/senna.jpg' },
+    { name: 'Lewis Hamilton', titles: '7 ' + t('legends.titles'), years: '2007-' + new Date().getFullYear(), periodLabel: t('legends.period'), desc: t('legends.hamilton.desc'), color: 'from-purple-600 to-purple-800', wikiUrl: 'https://en.wikipedia.org/wiki/Lewis_Hamilton', photo: '/images/legends/hamilton.jpg' },
+    { name: 'Max Verstappen', titles: '4 ' + t('legends.titles'), years: '2015-' + new Date().getFullYear(), periodLabel: t('legends.period'), desc: t('legends.verstappen.desc'), color: 'from-blue-600 to-blue-800', wikiUrl: 'https://en.wikipedia.org/wiki/Max_Verstappen', photo: '/images/legends/verstappen.jpg' },
+    { name: 'Alain Prost', titles: '4 ' + t('legends.titles'), years: '1980-1993', periodLabel: t('legends.period'), desc: t('legends.prost.desc'), color: 'from-yellow-600 to-yellow-800', wikiUrl: 'https://en.wikipedia.org/wiki/Alain_Prost', photo: '/images/legends/prost.jpg' },
+    { name: 'Sebastian Vettel', titles: '4 ' + t('legends.titles'), years: '2007-2022', periodLabel: t('legends.period'), desc: t('legends.vettel.desc'), color: 'from-cyan-600 to-cyan-800', wikiUrl: 'https://en.wikipedia.org/wiki/Sebastian_Vettel', photo: '/images/legends/vettel.jpg' },
   ]
 
   return (
@@ -1351,14 +1351,23 @@ function LendasSection() {
                 <div className={`h-2 bg-gradient-to-r ${lenda.color}`} />
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-f1 text-xl text-white group-hover:text-[#E10600] transition-colors">
-                        {lenda.name}
-                      </h3>
-                      <p className="text-white/50 text-xs">{lenda.periodLabel}</p>
-                      <p className="text-[#E10600] text-sm font-medium">{lenda.years}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/10 flex-shrink-0">
+                        <img
+                          src={lenda.photo}
+                          alt={lenda.name}
+                          className="w-full h-full object-cover object-top"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-f1 text-lg text-white group-hover:text-[#E10600] transition-colors leading-tight">
+                          {lenda.name}
+                        </h3>
+                        <p className="text-white/50 text-xs">{lenda.periodLabel}</p>
+                        <p className="text-[#E10600] text-sm font-medium">{lenda.years}</p>
+                      </div>
                     </div>
-                    <div className="bg-white/10 px-3 py-1 rounded-full">
+                    <div className="bg-white/10 px-3 py-1 rounded-full flex-shrink-0">
                       <span className="text-white text-sm font-bold">{lenda.titles}</span>
                     </div>
                   </div>
