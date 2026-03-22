@@ -85,8 +85,9 @@ const TEAM_LOGOS: Record<string, string> = {
   'Alpine': '/images/teams/alpine.png',
   'Williams': '/images/teams/williams.png',
   'Haas': '/images/teams/haas.png',
-  'RB': '/images/teams/rb.png',
-  'Sauber': '/images/teams/sauber.jpg',
+  'Racing Bulls': '/images/teams/racingbulls.png',
+  'Audi': '/images/teams/audi.png',
+  'Cadillac': '/images/teams/cadillac.png',
 }
 
 const CIRCUITOS_DATA = [
